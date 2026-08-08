@@ -96,8 +96,8 @@ td{padding:8px 12px;font-size:12px;vertical-align:top}
 /* ===== 익명 수집 안내 + 운영자 콘솔 ===== */
 .collect-note{max-width:1200px;margin:26px auto 6px;padding:0 16px;font-size:11px;color:#94a3b8;text-align:center;line-height:1.6}
 .op-footer{max-width:1200px;margin:0 auto;padding:14px 16px 40px;text-align:center}
-.op-open-btn{background:#0f172a;color:#e2e8f0;border:none;padding:9px 18px;border-radius:8px;font-size:12px;cursor:pointer;opacity:.72;transition:opacity .2s}
-.op-open-btn:hover{opacity:1}
+.op-open-btn{background:none;border:none;color:#cbd5e1;font-size:12px;cursor:pointer;opacity:.45;transition:opacity .2s;padding:4px 8px}
+.op-open-btn:hover{opacity:.9}
 .op-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;z-index:1000;overflow-y:auto;padding:24px}
 .op-overlay.open{display:flex}
 .op-modal{background:#fff;border-radius:14px;max-width:960px;width:100%;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
@@ -241,22 +241,22 @@ td{padding:8px 12px;font-size:12px;vertical-align:top}
 <!-- 익명 수집 안내 -->
 <div class="collect-note">ℹ️ 입력하신 필터 조건은 서비스 개선을 위해 <b>익명(개인 식별 정보 없음)</b>으로 기록됩니다. 이름·학번 등은 수집하지 않습니다.</div>
 
-<!-- 운영자 콘솔 진입 버튼 (최하단) -->
+<!-- 설정(관리) 진입 버튼 (최하단) -->
 <div class="op-footer">
-  <button class="op-open-btn" onclick="opOpen()">🔒 운영자 콘솔</button>
+  <button class="op-open-btn" onclick="opOpen()" title="설정" aria-label="설정">⚙</button>
 </div>
 
-<!-- 운영자 콘솔 모달 -->
+<!-- 설정(관리) 모달 -->
 <div class="op-overlay" id="op-overlay" onclick="if(event.target===this)opClose()">
   <div class="op-modal">
     <div class="op-head">
-      <h2>🔒 운영자 콘솔</h2>
+      <h2>⚙ 설정</h2>
       <button class="op-close" onclick="opClose()">✕</button>
     </div>
     <div class="op-body">
       <div id="op-login">
         <div class="op-login">
-          <input type="password" id="op-pass" placeholder="운영자 비밀번호" onkeydown="if(event.key==='Enter')opLogin()">
+          <input type="password" id="op-pass" placeholder="비밀번호" onkeydown="if(event.key==='Enter')opLogin()">
           <button class="op-btn" onclick="opLogin()">열람</button>
         </div>
         <div class="op-err" id="op-err" style="display:none"></div>
@@ -601,7 +601,7 @@ function opClearAll(){
   opCall('admin_clear_logs',{pass:OP_PASS}).then(()=>opRefresh()).catch(()=>alert('삭제 실패'));
 }
 function opChangePass(){
-  const np=prompt('새 운영자 비밀번호 (6자 이상):'); if(!np) return;
+  const np=prompt('새 비밀번호 (6자 이상):'); if(!np) return;
   if(np.length<6){ alert('6자 이상이어야 합니다.'); return; }
   opCall('admin_set_pass',{pass:OP_PASS,new_pass:np}).then(()=>{ OP_PASS=np; alert('비밀번호가 변경되었습니다.'); }).catch(()=>alert('변경 실패'));
 }
