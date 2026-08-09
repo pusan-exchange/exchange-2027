@@ -62,7 +62,19 @@ async function main() {
     console.log(`🗑️  ${n}건 삭제 완료.`); return;
   }
 
-  const rows = await rpc('admin_get_logs', { pass: env.ADMIN_SECRET });
+  // PostgREST는 한 번에 최대 1000행만 반환 → offset 페이지네이션으로 전체 수집
+  const rows = [];
+  for (let offset = 0; ; offset += 1000) {
+    const r = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/admin_get_logs?limit=1000&offset=${offset}`,
+      { method: 'POST', headers: HEAD, body: JSON.stringify({ pass: env.ADMIN_SECRET }) });
+    if (!r.ok) {
+      if (r.status === 403 || r.status === 400) { console.error('❌ 토큰이 올바르지 않습니다 (권한 없음).'); process.exit(2); }
+      console.error(`❌ 요청 실패: HTTP ${r.status}`); process.exit(2);
+    }
+    const chunk = await r.json();
+    rows.push(...chunk);
+    if (chunk.length < 1000) break;
+  }
   const bySearcher = {};
   for (const r of rows) (bySearcher[r.searcher_id] ??= []).push(r);
   const sids = Object.keys(bySearcher);
