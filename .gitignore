@@ -1,8 +1,5 @@
-# 운영자 도구/비밀 (절대 배포/커밋 금지)
-admin/
+# 비밀·로컬 전용 (커밋 금지)
 *.env
-.env
-.DS_Store
-
-# 원본 데이터(로컬 보관, 배포 제외)
+admin/exports/
 data-sources/
+.DS_Store
