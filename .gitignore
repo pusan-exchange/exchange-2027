@@ -3,3 +3,6 @@ admin/
 *.env
 .env
 .DS_Store
+
+# 원본 데이터(로컬 보관, 배포 제외)
+data-sources/
