@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2027-1학기 1차 합격 결과</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;font-size:14px}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1a3a6b,#2563eb);color:#fff;padding:18px 28px 14px}
+header h1{font-size:18px;font-weight:800;letter-spacing:-.3px}
+header p{font-size:11px;opacity:.75;margin-top:4px}
+
+/* FILTER PANEL */
+.filters{background:#fff;border-bottom:1px solid #dde3ea;padding:16px 28px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.fg select,.fg input{padding:6px 10px;border:1.5px solid #cbd5e1;border-radius:7px;font-size:13px;background:#fff;outline:none;transition:border .15s}
+.fg select:focus,.fg input:focus{border-color:#2563eb}
+.fg input[type=number]{width:90px}
+.toggles{display:flex;flex-direction:column;gap:6px;justify-content:flex-end}
+.toggle-lbl{display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.toggle-lbl input{width:15px;height:15px;cursor:pointer;accent-color:#2563eb}
+.toggle-lbl span{font-size:11px;font-weight:700}
+.btns{display:flex;gap:8px;align-items:flex-end;margin-left:auto}
+.btn{padding:7px 16px;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-p{background:#2563eb;color:#fff}.btn-p:hover{background:#1d4ed8}
+.btn-r{background:#e2e8f0;color:#475569}.btn-r:hover{background:#cbd5e1}
+
+/* STAT BAR */
+.statbar{background:#eef3f9;border-bottom:1px solid #dde3ea;padding:8px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.stats{display:flex;gap:16px;font-size:12px;color:#475569}
+.stats strong{color:#1e40af;font-size:15px}
+.sort-row{display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b}
+.sort-row select{padding:3px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px}
+
+/* TABLE */
+.wrap{padding:0 28px 60px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px;min-width:900px}
+thead th{background:#1a3a6b;color:#fff;padding:9px 12px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;z-index:10;white-space:nowrap}
+tbody tr{border-bottom:1px solid #e8ecf1;cursor:pointer;transition:background .1s}
+tbody tr:hover{background:#eff6ff!important}
+td{padding:8px 12px;font-size:12px;vertical-align:top}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.b유럽{background:#dbeafe;color:#1e40af}
+.b아시아{background:#dcfce7;color:#166534}
+.b북미{background:#fef3c7;color:#92400e}
+.b중남미{background:#ffe4e6;color:#9f1239}
+.b오세아니아{background:#f3e8ff;color:#6b21a8}
+.b기타{background:#f1f5f9;color:#475569}
+.hist-3{background:#fee2e2;color:#991b1b}
+.hist-2{background:#fef3c7;color:#92400e}
+.major-ok{background:#dcfce7;color:#166534}
+.major-biz{background:#ede9fe;color:#5b21b6}
+.major-chk{background:#fef9c3;color:#713f12}
+.major-bad{background:#fee2e2;color:#991b1b}
+.major-likely{background:#dbeafe;color:#1e40af}
+
+.univ-kr{font-weight:700;color:#1a3a6b;line-height:1.4;white-space:pre-line}
+.star{color:#f5a623;margin-right:5px;font-size:14px;font-weight:400;vertical-align:1px;text-shadow:0 1px 1px rgba(245,166,35,.25)}
+.badge.pop-in{background:#fff7e0;color:#b7791f;border:1px solid #f6d98a}
+.badge.pop-un{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0}
+.univ-en{font-size:10px;color:#94a3b8;margin-top:1px;white-space:pre-line}
+.rank-qs{font-weight:700;color:#1e40af;font-size:12px}
+.rank-the{font-size:10px;color:#94a3b8}
+.score-ok{color:#16a34a;font-weight:700}
+.score-ng{color:#dc2626}
+.to-num{font-weight:800;color:#2563eb;font-size:14px;text-align:center}
+.btn-detail{background:#2563eb;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:10px;cursor:pointer;white-space:nowrap}
+.btn-detail:hover{background:#1d4ed8}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:680px;max-width:95vw;max-height:85vh;overflow-y:auto;padding:28px 32px;position:relative;box-shadow:0 25px 60px rgba(0,0,0,.3)}
+.modal-close{position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b}
+.modal-close:hover{background:#e2e8f0}
+.modal h2{font-size:17px;color:#1a3a6b;font-weight:800;white-space:pre-line;line-height:1.4}
+.modal-sub{font-size:11px;color:#94a3b8;margin-top:3px;margin-bottom:18px}
+.modal-sec{margin-bottom:16px}
+.modal-sec h3{font-size:10px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+.modal-sec p{font-size:12px;color:#374151;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.modal-links a{display:block;font-size:11px;color:#2563eb;text-decoration:none;margin-bottom:4px;word-break:break-all}
+.modal-links a:hover{text-decoration:underline}
+.modal-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.meta-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 12px;font-size:11px}
+.meta-item strong{display:block;color:#64748b;font-size:9px;text-transform:uppercase;margin-bottom:2px}
+.meta-item span{font-weight:700;color:#1a3a6b}
+
+.no-result{text-align:center;padding:60px;color:#94a3b8;font-size:14px}
+
+/* ===== 익명 수집 안내 + 운영자 콘솔 ===== */
+.collect-note{max-width:1200px;margin:26px auto 6px;padding:0 16px;font-size:11px;color:#94a3b8;text-align:center;line-height:1.6}
+.op-footer{max-width:1200px;margin:0 auto;padding:14px 16px 40px;text-align:center}
+.op-open-btn{background:none;border:none;color:#cbd5e1;font-size:12px;cursor:pointer;opacity:.45;transition:opacity .2s;padding:4px 8px}
+.op-open-btn:hover{opacity:.9}
+.op-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;z-index:1000;overflow-y:auto;padding:24px}
+.op-overlay.open{display:flex}
+.op-modal{background:#fff;border-radius:14px;max-width:960px;width:100%;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.op-head{background:#0f172a;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+.op-head h2{font-size:15px;margin:0}
+.op-close{background:none;border:none;color:#cbd5e1;font-size:20px;cursor:pointer;line-height:1}
+.op-body{padding:20px}
+.op-login{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.op-login input{padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;flex:1;min-width:180px}
+.op-btn{background:#4f46e5;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap}
+.op-btn.gray{background:#64748b}.op-btn.red{background:#dc2626}.op-btn.ghost{background:#eef2ff;color:#4f46e5}
+.op-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.op-summary{font-size:13px;color:#475569;margin-bottom:12px}
+.op-summary strong{color:#0f172a}
+.op-searcher{border:1px solid #e2e8f0;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.op-searcher-head{background:#f8fafc;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:13px;gap:10px}
+.op-sid{font-family:monospace;color:#4f46e5;font-weight:600}
+.op-searcher-body{display:none}
+.op-searcher.open .op-searcher-body{display:block}
+.op-log-table{width:100%;border-collapse:collapse;font-size:11px}
+.op-log-table th{background:#f1f5f9;padding:6px 8px;text-align:left;color:#64748b;font-weight:600}
+.op-log-table td{padding:6px 8px;border-top:1px solid #f1f5f9;color:#475569;vertical-align:top}
+.op-err{color:#dc2626;font-size:12px;margin-top:8px}
+.op-muted{color:#94a3b8;font-size:12px}
+@media(max-width:640px){.op-log-table{font-size:10px}.op-body{padding:14px}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>2027학년도 1학기 · 1차 합격 결과</h1>
+  <p>부산대학교 국제처 · 정규 1차 선발 · 파견대학별 합격 인원 · 총 148명 · <span style="color:#f5a623">★</span> 인기교 표시 <span style="opacity:.7">(개인정보 미포함)</span></p>
+  <p style="margin-top:8px"><a href="index.html" style="color:#c7d2fe;font-size:12px;text-decoration:none">← 교환학생 필터(모집요강)로</a></p>
+</header>
+
+<div class="filters">
+  <div class="fg">
+    <label>대륙</label>
+    <select id="f-cont">
+      <option value="">전체</option>
+      <option>유럽</option><option>아시아</option><option>북미</option><option>오세아니아</option><option>중남미</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>나라</label>
+    <select id="f-country">
+      <option value="">전체</option>
+      <option>네덜란드</option><option>노르웨이</option><option>대만</option><option>덴마크</option><option>독일</option><option>루마니아</option><option>리투아니아</option><option>말레이시아</option><option>멕시코</option><option>미국</option><option>미국/영국 등</option><option>벨기에</option><option>스웨덴</option><option>스위스</option><option>스페인</option><option>싱가포르</option><option>아일랜드</option><option>에스토니아</option><option>에콰도르</option><option>영국</option><option>영국
+(웨일스)</option><option>오스트리아</option><option>이탈리아</option><option>인도네시아</option><option>일본</option><option>중국</option><option>중국
+(홍콩)</option><option>체코</option><option>카자흐스탄</option><option>캐나다</option><option>튀르키예</option><option>폴란드</option><option>프랑스</option><option>핀란드</option><option>호주</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>언어</label>
+    <select id="f-lang">
+      <option value="">전체</option>
+      <option>영어</option><option>일본어</option><option>중국어</option><option>독일어</option><option>스페인어</option><option>프랑스어</option><option>이탈리아어</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>내 전공 계열</label>
+    <select id="f-major" onchange="applyFilter()">
+      <option value="">전체</option>
+      <option>인문계열</option>
+      <option>사회과학계열</option>
+      <option>상경계열</option>
+      <option>자연과학계열</option>
+      <option>공학계열</option>
+      <option>사범계열</option>
+      <option>예술·체육계열</option>
+      <option>의약·생명계열</option>
+      <option>생활과학계열</option>
+      <option>자유전공·기타</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>QS 상한</label>
+    <input type="number" id="f-qs" placeholder="예: 500">
+  </div>
+  <div class="fg">
+    <label>내 TOEFL iBT</label>
+    <input type="number" id="f-ibt" placeholder="예: 85" min="0" max="120">
+  </div>
+  <div class="toggles">
+    <label class="toggle-lbl">
+      <input type="checkbox" id="f-hist" onchange="applyFilter()">
+      <span style="color:#dc2626">🔴 비인기교만 보기</span>
+    </label>
+  </div>
+  <div class="btns">
+    <button class="btn btn-p" onclick="applyFilter()">필터 적용</button>
+    <button class="btn btn-r" onclick="resetFilter()">초기화</button>
+  </div>
+</div>
+
+<div class="statbar">
+  <div class="stats">
+    <div>대학 <strong id="s-count">72</strong>개</div>
+    <div>총 합격 <strong id="s-to">-</strong>명</div>
+    <div>비인기교 <strong id="s-hist" style="color:#dc2626">-</strong>개</div>
+  </div>
+  <div class="sort-row">
+    정렬:
+    <select id="sort-by" onchange="applyFilter()">
+      <option value="qs">QS 랭킹순</option>
+      <option value="the">THE 랭킹순</option>
+      <option value="hap" selected>합격인원순</option>
+      <option value="country">나라순</option>
+    </select>
+  </div>
+</div>
+
+<div class="wrap">
+  <table>
+    <thead><tr>
+      <th>#</th><th>대륙 / 나라</th><th>대학명</th><th>언어</th>
+      <th>QS / THE</th><th>iBT 커트</th><th>1차<br>합격</th><th>인기도</th><th>전공</th><th></th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="no-result" class="no-result" style="display:none">조건에 맞는 대학이 없습니다.</div>
+</div>
+
+<!-- 모달 -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="m-kr"></h2>
+    <div class="modal-sub" id="m-en"></div>
+    <div class="modal-meta" id="m-meta"></div>
+    <div class="modal-sec"><h3>📋 자격기준</h3><p id="m-qual"></p></div>
+    <div class="modal-sec"><h3>📁 세부사항 / 필요서류</h3><p id="m-detail"></p></div>
+    <div class="modal-sec"><h3>📅 파견 학사일정</h3><p id="m-sched"></p></div>
+    <div class="modal-sec modal-links"><h3>🔗 홈페이지</h3><div id="m-links"></div></div>
+  </div>
+</div>
+
+<!-- 익명 수집 안내 -->
+<div class="collect-note">ℹ️ 입력하신 필터 조건은 서비스 개선을 위해 <b>익명(개인 식별 정보 없음)</b>으로 기록됩니다. 이름·학번 등은 수집하지 않습니다.</div>
+
+<!-- 설정(관리) 진입 버튼 (최하단) -->
+<div class="op-footer">
+  <button class="op-open-btn" onclick="opOpen()" title="설정" aria-label="설정">⚙</button>
+</div>
+
+<!-- 설정(관리) 모달 -->
+<div class="op-overlay" id="op-overlay" onclick="if(event.target===this)opClose()">
+  <div class="op-modal">
+    <div class="op-head">
+      <h2>⚙ 설정</h2>
+      <button class="op-close" onclick="opClose()">✕</button>
+    </div>
+    <div class="op-body">
+      <div id="op-login">
+        <div class="op-login">
+          <input type="password" id="op-pass" placeholder="비밀번호" onkeydown="if(event.key==='Enter')opLogin()">
+          <button class="op-btn" onclick="opLogin()">열람</button>
+        </div>
+        <div class="op-err" id="op-err" style="display:none"></div>
+        <div class="op-muted" style="margin-top:10px">검색 기록은 익명 ID별로 분류되어 표시됩니다.</div>
+      </div>
+      <div id="op-console" style="display:none">
+        <div class="op-toolbar">
+          <button class="op-btn" onclick="opDownloadXlsx()">⬇ 엑셀(.xlsx)</button>
+          <button class="op-btn ghost" onclick="opDownloadMd()">⬇ 마크다운(.md)</button>
+          <button class="op-btn gray" onclick="opRefresh()">↻ 새로고침</button>
+          <button class="op-btn gray" onclick="opChangePass()">🔑 비번변경</button>
+          <button class="op-btn red" onclick="opClearAll()">전체 삭제</button>
+        </div>
+        <div class="op-summary" id="op-summary"></div>
+        <div id="op-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [{"대학명(국문)":"ESME 수드리아\n(ESME 공과대학)","대학명(영문)":"ESME Sudria\n(ESME Engineering School)","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":42,"IELTS_커트":5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 42 / TOEFL ITP 460 / IELTS 5.0 / TOEIC 550 \n  ※ TOEFL my best score 점수 제출 가능 ","세부사항":"(수강제한)\n학부 과정 과목과 대학원 과정 과목의 혼합 수강은 불가","파견대학 학사력":"· Fall : Sep-Feb\n· Spring : Feb-Jun","홈페이지":"(대학) https://www.esme.fr/en/\n(교환학생) https://www.esme.fr/en/information-engineering-school/top-five-reasons-to-join-esme/\n(강의정보) https://www.esme.fr/en/undergraduate-international-program/","인기":true,"미달횟수":0,"최고차수":1,"합격인원":8},{"대학명(국문)":"국립동양어문화대학\n(INALCO)","대학명(영문)":"National Institute of Oriental Languages and Civilizations(INALCO)","파견국":"프랑스","대륙":"유럽","언어":"불어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(프랑스어)\n- (정규 학위과정) DELF B1 \n  ※ 소속 및 수강 관련, 세부정보의 (제한사항) 반드시 확인\n- (프랑스어 어학과정) 제한 없음","세부사항":"1. 제한사항\n(수강제한) 파견대학 사정에 따라 매 학기 일부 전공 소속 및 강의 수강을 제한하고 있으므로, 반드시 파견대학 홈페이지에서 확인 후 지원\n2. 특이사항\n(영어강의) 미제공\n  ※ 해당 대학은 모든 과목을 '프랑스어'로 강의함에 유의","파견대학 학사력":"· Fall : Sep-Jan\n· Spring : Jan-Jun","홈페이지":"(대학) http://www.inalco.fr/en/\n(교환학생) https://www.inalco.fr/en/exchange-students-inalco\n(강의정보) https://catalogue.inalco.fr/en/catalogue\n(주거정보) Inalco works with external residences (CIUP/CROUS/ALJT), located within the Paris city limits, to provide exchange students with student housing. \nPrices range from €500 to €800 (approximately), or about half of the average price of housing on the private market. However, please note that housing cannot be guaranteed, especially for the Fall semester. Students wishing to apply for one of these residences must include this information in their online application form.","인기":false,"미달횟수":2,"최고차수":2,"합격인원":7},{"대학명(국문)":"오스트라바대학","대학명(영문)":"University of Ostrava","파견국":"체코","대륙":"유럽","언어":"영어","QS Ranking":"1201-1400","THE 랭킹":"1501+","iBT_커트":65,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 :\n(영어) TOEFL iBT 65 / TOEFL ITP 543 / IELTS 5.5 / TOEIC 605\n  ※ TOEFL my best score 또는 IELTS one skill retake 점수 제출 가능","세부사항":"1. 제한사항\n(지원불가) Medicine\n(지원제한) Faculty of Fine Arts and Music : 부산대에서 해당 학문분야(미술, 음악)를 전공하고, 파견대학에서 교환학생의 수강을 허용하는 경우에만 지원 가능","파견대학 학사력":"· Winter(Fall) : Sep-Feb\n· Summer(Spring) : Feb-Jun","홈페이지":"(대학) https://www.osu.eu/\n(교환학생) https://www.osu.eu/non-erasmus-plus/\n(영어강의) https://www.osu.eu/22821/courses/\n(주거정보) https://www.osu.eu/accommodation/","인기":true,"미달횟수":0,"최고차수":1,"합격인원":6},{"대학명(국문)":"데우스토대학","대학명(영문)":"University of Deusto","파견국":"스페인","대륙":"유럽","언어":"영어","QS Ranking":"1001-1200","THE 랭킹":"1201-1500","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5","세부사항":"(해당 없음)","파견대학 학사력":"· 1st(Autumn): Sep-Dec\n· 2nd(Spring): Feb-Jun","홈페이지":"(대학) https://www.deusto.es/en/\n(교환학생) http://www.international.deusto.es/\n(강의정보) https://www.deusto.es/en/home/international/international-students/academic-offer\n(주거정보) https://www.deusto.es/en/home/campus-life/services/accommodation","인기":true,"미달횟수":0,"최고차수":1,"합격인원":6},{"대학명(국문)":"사이타마대학","대학명(영문)":"Saitama University","파견국":"일본","대륙":"아시아","언어":"영어/일어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":65,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 2.9 이상\n3. 어학기준 :\n(영어) TOEFL iBT 65 / TOEFL ITP 530 / IELTS 5.5 \n(일본어) JLPT N2 이상\n4. 특이사항 : (학부)최소 4학기 이상 이수 학생만 지원 가능","세부사항":"1. 특이사항\n(선발인원) 아래와 같이 부산대 소속 단과대학별 TO 분리하여 선발\n A. 경제통상대학 및 경영대학 소속 학생(본/복수전공 기준) : 4명\n B. 타 단과대학 소속 학생 : 2명","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Sep-Feb","홈페이지":"(대학) https://www.saitama-u.ac.jp/\n(교환학생) https://en.saitama-u.ac.jp/exchangeprograms/\n(강의정보) http://en.saitama-u.ac.jp/exchangeprograms/courses/\n(주거정보) https://en.saitama-u.ac.jp/exchangeprograms/housing/","인기":false,"미달횟수":2,"최고차수":3,"합격인원":6},{"대학명(국문)":"오사카대학","대학명(영문)":"Osaka University","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":95,"THE 랭킹":151,"iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 각 프로그램별 지원자격 및 지원전공 확인 필수\n2. 성적기준 : 평점평균 4.5만점 기준 3.5 이상\n3. 어학기준 : \n(영어) TOEFL iBT 80 / IELTS 6.0  (OUSSEP 트랙)\n(일본어) JLPT N2  (iExPO 트랙)","세부사항":"1. 제한사항\n각 프로그램별(iExPo, OUSSEP) 지원자격 및 지원전공 확인 후 지원","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Oct-Feb","홈페이지":"1. 홈페이지\n(대학) http://www.osaka-u.ac.jp/en\n(교환학생) https://www.osaka-u.ac.jp/sp/whyou/uploads/faq-useful/UOsaka-ExchangePrograms.pdf\n(강의정보) https://koan.osaka-u.ac.jp/syllabus_ex-e/campus\n(영어강의) https://www.osaka-u.ac.jp/en/international/inbound/exchange_program/eng_course\n(주거정보) https://globalvillage.icho.osaka-u.ac.jp/index.html (Off campus dormitory)","인기":true,"미달횟수":0,"최고차수":1,"합격인원":5},{"대학명(국문)":"다름슈타트공과대학","대학명(영문)":"Technical University of Darmstadt","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":250,"THE 랭킹":"251-300","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5\n(독일어) Zertifikat Deutsch(ZD) B2\n4. 특이사항 :  파견시점 기준 3학년 이상(4학기 이상 이수) 학생만 지원 가능","세부사항":"1. 제한사항\n(수강제한) We cannot accept students whose major at PNU is different from the majors offered at TU Darmstadt","파견대학 학사력":"· Winter : Oct–Mar\n· Summer : Apr–Sep","홈페이지":"(대학) www.tu-darmstadt.de/\n(교환학생) www.tu-darmstadt.de/incoming\n(강의정보) https://www.tucan.tu-darmstadt.de/ and https://www.tu-darmstadt.de/studieren/studieninteressierte/internationale_studieninteressierte/austauschprogramme_inbound/index.en.jsp","인기":false,"미달횟수":2,"최고차수":2,"합격인원":5},{"대학명(국문)":"킬대학","대학명(영문)":"Kiel University\n(Christian-Albrechts-Universität zu Kiel)","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":620,"THE 랭킹":"351-400","iBT_커트":71,"IELTS_커트":5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 71 / IELTS 5.0\n(독일어) ZD B1","세부사항":"1. 제한사항\n(수강제한) 과목별 언어 수준 별도 확인 필요 : Check the course description or contact the course instructor to confirm the exact language requirements.\n\n(연속파견 제한) 파견대학 규정에 따라, 동일 학년도(Academic Year) 내에서만 재지원(=재선발=파견 연장) 가능\n※  본교 기준 2학기에 최초 파견된 학생만 다음 학기(1학기)에 동일대학 재지원(파견 연장) 가능","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Sep","홈페이지":"(대학) https://www.uni-kiel.de/en/\n(교환학생) www.international.uni-kiel.de/en/incomings/\n(강의정보) https://www.international.uni-kiel.de/en/finding-courses-exchange-students?set_language=en\n(주거정보) https://www.international.uni-kiel.de/en/incomings/planning-arrival-and-stay/accomodation","인기":false,"미달횟수":1,"최고차수":3,"합격인원":4},{"대학명(국문)":"만하임대학,\n인문대학","대학명(영문)":"University of Mannheim,\nSchool of Humanities","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":425,"THE 랭킹":"201-250","iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 80 / IELTS 6.0\n(독일어) ZD B2 ","세부사항":"1. 제한사항\n(가능 전공) English and American Studies/ French Studies/ German Studies/ History/ Hispanic Studies/ Italian Studies/ Media and Communication Studies/ Philosophy \n(수강제한) Exchange students must take the majority of their courses at the school in which they will enroll. However, they can also choose one or two courses from other schools through the university wide electives.  Students can take limited courses from other Faculties. \n2. 특이사항\n(유의사항) 교환학생 전체 학습과정에 높은 수준의 영어실력이 요구되는 점을 반드시 고려하여 지원 - 파견대학 국제처 공식 안내사항\n(연속파견 제한) 파견대학 규정에 따라, 동일 학년도(Academic Year) 내에서만 재지원(=재선발=파견 연장) 가능\n  ※  본교 기준 2학기에 최초 파견된 학생만 다음 학기(1학기)에 동일대학 재지원(파견 연장) 가능","파견대학 학사력":"· Fall : Aug-Jan\n· Spring : Feb-Jun","홈페이지":"(대학) https://www.uni-mannheim.de/en/\n(단과대학) https://www.phil.uni-mannheim.de/en/\n(교환학생) https://www.uni-mannheim.de/en/academics/coming-to-mannheim/exchange-students/\n(강의정보) https://www.uni-mannheim.de/en/academics/coming-to-mannheim/exchange-students/courses/","인기":false,"미달횟수":2,"최고차수":2,"합격인원":4},{"대학명(국문)":"레겐스부르크대학","대학명(영문)":"University of Regensburg","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":696,"THE 랭킹":"401-500","iBT_커트":79,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n  ※ 세부사항 내 (제한사항) 참고\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 79 / TOEFL ITP 543 / IELTS 6.0 / TOEIC 785(LC 400, RC 385)\n  ※ 특정 분야의 경우 보다 높은 또는 추가 어학성적을 요구하며, 세부사항의 (제한사항) 참고\n  ※ TOEFL My Best Score 점수 인정, IELTS One Skill Retake 인정\n(독일어)\n- (정규 학위과정) ZD B2 \n4. 특이사항 :  파견시점 기준 3학년 이상(4학기 이상 이수) 학생만 지원 가능","세부사항":"1. 제한사항\n(소속제한) Medicine/ Dentistry/ Pharmacy/ Fine Arts and Art History/ Sport Sciences/ Biochemistry\n(수강제한) Majority of courses taken should come from main subject if possible, but other areas are open as well if student needs it for their degree and has necessary pre-knowledge.\n(어학기준 상향) \n아래 링크의 \"Language Skills\" 에서 본인이 지원을 희망하는 언어/전공별 어학기준을 추가 확인하고 최종 지원 여부를 결정할 것\n  ※ (링크) https://www.uni-regensburg.de/en/international/coming-to-regensburg/exchange-programs/application\n(영어강의) 대부분 영어강의(특히, 경영/경제)가 학부 고학년 또는 석사 단위에서 이루어지므로, \"파견시점 기준 학부 2학년\"의 경우 파견대학에 별도 문의 후 지원 여부를 결정할 것 - 파견대학 요청사항","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Aug","홈페이지":"(대학) https://www.uni-regensburg.de/en/\n(교환학생) https://www.uni-regensburg.de/en/international/coming-to-regensburg/exchange-programs\n(강의정보) https://campusportal.uni-regensburg.de/qisserver/pages/cm/exa/coursecatalog/showCourseCatalog.xhtml?_flowId=showCourseCatalog-flow&_flowExecutionKey=e1s1\n(영어강의) https://www.uni-regensburg.de/en/international/coming-to-regensburg/exchange-programs/course-selection-amp-learning-agreement/courses-taught-in-english\n(주거정보) https://www.uni-regensburg.de/en/international/coming-to-regensburg/exchange-programs/accommodation","인기":false,"미달횟수":2,"최고차수":3,"합격인원":4},{"대학명(국문)":"인랜드노르웨이대학","대학명(영문)":"University of Inland Norway(Universitetet i Innlandet)","파견국":"노르웨이","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":60,"IELTS_커트":5,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) 학사- TOEFL iBT 60('26.01.21.이후 3.5) / IELTS 5.0\n        석사- TOE리 iBT 90('26.01.21.이후 4.5) / IELTS 6.5","세부사항":"1. 제한사항\n(수강제한)\n A. 일부 과목의 경우 수강신청(허가)에 별도 요건을 요구할 수 있음\n B. Students can not take courses from several campuses.\n2. 특이사항\n(교명변경) 舊. 릴리함메르대학이 타 대학과 2017년에 통합하여 출범한 대학, 인랜드노르웨이응용과학대학에서 인랜드노르웨이대학으로 교명 변경(2026년)","파견대학 학사력":"· Autumn : Aug-Dec\n· Spring : Jan-Jun","홈페이지":"(대학) https://www.inn.no/english/\n(교환학생) https://www.inn.no/english/study-options/incoming-exchange-students/\n(강의정보) https://www.inn.no/english/study-opportunities/our-studies/\n(주거정보) https://www.inn.no/english/for-students/specific-information-for-international-students/accomodation/","인기":false,"미달횟수":2,"최고차수":3,"합격인원":3},{"대학명(국문)":"오이타대학","대학명(영문)":"Oita University","파견국":"일본","대륙":"아시아","언어":"영어/일어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":61,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 : \n(영어) TOEFL iBT 61 / TOEFL ITP 500 / IELTS 6.0 \n(일본어) JLPT N2 ","세부사항":"1. 제한사항\n(국적제한) 일본 국적자 지원 불가\n(가능전공)\n A. In principle, exchange students can only take “Japanese Language and Japanese Studies Courses” and “Global Studies Course.\n B. \"General Education Courses\" and \"Specialization Courses\" are available for students with JLPT N1 certifications(some exceptions may apply).\n C. *Please check the GAIA website (https://www.gaia.oita-u.ac.jp/en/academic/) for the details of the course offerings. The course offerings in 2026 will be updated in March (2027).","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Oct-Feb","홈페이지":"(대학) https://www.oita-u.ac.jp/lang/en/\n(교환학생) https://www.gaia.oita-u.ac.jp/en/academic/tanki/iglobe/\n(강의정보) https://www.gaia.oita-u.ac.jp/pdf/syllabus2025.pdf\n(주거정보) https://www.gaia.oita-u.ac.jp/en/campus/juukyo/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":3},{"대학명(국문)":"함부르크대학","대학명(영문)":"University of Hamburg","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":209,"THE 랭킹":125,"iBT_커트":86,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 86 ('26.01.21.이후 4.5) / IELTS 6.0\n(독일어) ZD B1","세부사항":"1. 제한사항\n(수강제한) Closed for exchange students: dentistry, pharmacy and, starting in Winter 2027/28, psychology until further notice.\n2. 특이사항\nAll faculties of the University of Hamburg are open for exchange students. The final decision on acceptance is taken by the faculties.\n The Faculties of Business Administration and Business, Economics and Social Sciences only accept students enrolled in matching programs and able to show completion of introductory classes in that field on their transcripts. The Faculty of Medicine accepts applications only once per year.\n※ Undergraduate students planning on taking courses in English: contact us before nomination unless you can find enough courses in the previous year’s list corresponding to the semester the student wishes to attend (summer/winter): www.uni-hamburg.de/en-central-exchanges-incoming ➔ Useful links for planningyour courses","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Sep","홈페이지":"(교환학생) https://www.uni-hamburg.de/en/internationales/studierende/incoming/austausch-gaststudium/zentralaustausch-incoming.html\n(강의정보) www.uni-hamburg.de/en-central-exchanges-incoming\n※ Useful links for planning your courses 탭 확인 \n(주거정보) A limited number of rooms in student residences are available for incoming exchange students.","인기":true,"미달횟수":0,"최고차수":1,"합격인원":3},{"대학명(국문)":"시즈오카대학","대학명(영문)":"Shizuoka University","파견국":"일본","대륙":"아시아","언어":"영어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) 영어 실력이 유창한 자\n  ※ 별도 기준은 없으나, 영어로 수업(학습)이 가능한 정도여야 함\n(일본어) \n- (정규 학위과정) : JLPT N2 이상\n- (Japanese language program) : 일본어 실력이 유창한 자(별도 기준은 없으나, 일본어로 수업(학습)이 가능한 정도여야 함)\n","세부사항":"1. 제한사항\n(국적제한) 일본 국적자 지원 불가\n(가능전공)\n A. (Undergraduate) We have seven faculties of Humanities and Social Sciences, Education, Informatics, Science, Engineering, Agriculture, and Global Interdisciplinary Science and Innovation.\n  ※ (Undergraduate) There are very few general education courses offered in English, and these are not specialized courses. Credits earned from these English-taught courses may not be recognized by your home university.\n  ※ Note: Shizuoka University will decide the faculty for successful applicant based on his/her major and study plan, Japanese proficiency and the capacity of faculties and so on. We don’t accept any request for the change of faculty or campus.\n B. (Graduate/ Master Course) We have three Graduate Schools of Humanities and Social Sciences, Integrated Science and Technology, Mountain Watershed.\n  ※ (Graduate/ Master Course) Some introductory courses will be offered in English. Some lectures in Agriculture, Science, Engineering, and Information Science are conducted in English, while all lectures in Humanities, Social Sciences, and Education are conducted in Japanese.\n C. There is no guarantee that exchange stundets will be placed in their preferred department.\n(수강신청) Nearly all classes in the undergraduate program are taught in Japanese. A high level of Japanese language skills is necessary to take undergraduate classes.\nD. Japanese Immigration Law requires students to take at least 10 hours of classes per week, meaning students have the requirement to take at least 7 classes per term","파견대학 학사력":"· Spring : Apr-Sep\n· Fall : Oct-Mar","홈페이지":"(대학) https://www.shizuoka.ac.jp/\n(교환학생) https://www.suoic.shizuoka.ac.jp/english/international/exchange-student/\n(강의정보) https://www.suoic.shizuoka.ac.jp/english/international/exchange-student/\n(주거정보) https://www.suoic.shizuoka.ac.jp/english/international/dwelling/","인기":true,"미달횟수":0,"최고차수":1,"합격인원":3},{"대학명(국문)":"나바라대학","대학명(영문)":"University of Navarra","파견국":"스페인","대륙":"유럽","언어":"영어","QS Ranking":279,"THE 랭킹":"251-300","iBT_커트":80,"IELTS_커트":"","자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.1 이상\n3. 어학기준 :\n(영어) TOEFL iBT 80","세부사항":"1. 제한사항\n(가능 전공) Engineering/ Law& International Relations/ Humanities/ Architecture and Design\n(수강제한) Students must be enrolled full time (minimum 24 ECTS)\n\n(연속파견 제한) 파견대학 규정에 따라, 동일 학년도(Academic Year) 내에서만 재지원(=재선발=파견 연장) 가능\n※  본교 기준 2학기에 최초 파견된 학생만 다음 학기(1학기)에 동일대학 재지원(파견 연장) 가능","파견대학 학사력":"· Autumn : Sep-Jan\n· Spring : Jan-May","홈페이지":"(대학) http://www.unav.edu/en/home\n(교환학생) https://www.unav.edu/estudiantes/programas-de-intercambio/incoming\n(영어강의) https://www.unav.edu/estudiantes/programas-de-intercambio/incoming#courses","인기":true,"미달횟수":1,"최고차수":2,"합격인원":3},{"대학명(국문)":"프랑크푸르트 응용과학대학","대학명(영문)":"Frankfurt University of Applied Sciences","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5 / TOEIC 785 \n  ※ 건축전공(학부) 지원자의 경우, 독일어 ZD A2 이상 의무(추가) 충족","세부사항":"1. 제한사항\n(전공제한) Business Faculty: (1) 본교 주전공이 경영학과거나 (2) 부/복수전공이 경영학과면서 경영 전공 최소 6과목 이상 이수한 경우에만 지원 가능\n(수강제한) Civil Engineering only in German\n(재파견불가) 해당 대학의 경우, 교환학생 최대 수학기간을 1학기로 제한","파견대학 학사력":"· Winter : Sep-Feb\n· Summer : Mar-Jul","홈페이지":"(대학) https://www.frankfurt-university.de/en/\n(교환학생) https://www.frankfurt-university.de/en/studies/international-office/incomings/exchange/\n(강의정보) https://www.frankfurt-university.de/en/studies/international-office/incomings/exchange/courses-2627/\n(주거정보) https://www.frankfurt-university.de/en/studies/international-office/incomings/exchange/living-in-frankfurt/","인기":true,"미달횟수":1,"최고차수":2,"합격인원":2},{"대학명(국문)":"조지아주립대학","대학명(영문)":"Georgia State University","파견국":"미국","대륙":"북미","언어":"영어","QS Ranking":"851-900","THE 랭킹":"401-500","iBT_커트":69,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 : \n(영어) TOEFL iBT 69 / IELTS 6.0 \n * TOEFL IBT '26.1.21. 이후 성적 취득자: overall 4\n  ※ TOEFL My Best Score 및 IELTS One Skill Retake 인정 가능\n※ 이공계 1명 우선 선발(지원 전 유의사항 필독)","세부사항":"1. 제한사항\n(수강제한) Clinical Psychology, some nursing and education, music courses may not be available.","파견대학 학사력":"· Fall : Aug-Dec\n· Spring : Jan-May","홈페이지":"(대학) https://www.gsu.edu/\n(교환학생) https://www.studyabroad.gsu.edu/index.cfm?FuseAction=Programs.ViewProgramAngular&id=22176\n(강의정보) https://catalogs.gsu.edu/\n(주거정보) https://myhousing.gsu.edu/","인기":true,"미달횟수":0,"최고차수":1,"합격인원":2},{"대학명(국문)":"오스나브뤼크응용과학대학,\n농업과학조경대학","대학명(영문)":"Osnabrück University of Applied Sciences,\nFaculty of Agricultural Sciences and Landscape Architecture","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":42,"IELTS_커트":4,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 42 / TOEFL ITP 433 / IELTS 4.0 / TOEIC 550 \n(독일어) ZD B1 ","세부사항":"1. 제한사항\n(수강제한) The majority of courses has to be taken at the Faculty of Agricultural Sciences and Landscape Architecture. If there is interest in taking additional courses offered by other faculties, we will have to check with the other faculties if this is possible.","파견대학 학사력":"· Winter : Sep-Feb\n· Summer : Mar-Aug","홈페이지":"(대학) https://www.hs-osnabrueck.de/en/\n(단과대학) https://www.hs-osnabrueck.de/en/university/faculties/aul/\n(교환학생) https://www.hs-osnabrueck.de/en/university/faculties/agricultural-sciences-and-landscape-architecture-aul/international/\n(강의정보) https://www.hs-osnabrueck.de/en/university/faculties/agricultural-sciences-and-landscape-architecture-aul/international/modules-taught-in-english/\n(주거정보) https://www.hs-osnabrueck.de/en/housing-service/#c26647","인기":true,"미달횟수":1,"최고차수":2,"합격인원":2},{"대학명(국문)":"에어랑엔뉘른베르크대학","대학명(영문)":"University of Erlangen–Nuremberg\n(Friedrich-Alexander-Universität\nErlangen-Nürnberg)","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":218,"THE 랭킹":"201-250","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / IELTS 5.5 \n(독일어) ZD B2 \n  ※ 세부사항 내 (어학기준)의 안내 및 관련 링크를 통해 지원 예정 전공의 세부 어학기준을 반드시 확인 후 지원","세부사항":"1. 제한사항\n(지원) Student who have completed at least one year of studies at their home institution\n(지원제한) Law/ Human Medicine/ Dentistry/ Pharmacy/ biology/ Psychology\n(어학기준) 아래 링크를 참고하여, 본인이 지원하는 전공 또는 수강하고자 하는 수업별로 \"Language levels required for application\"에 명시된 어학요건 충족여부 확인\n  ※ (링크) https://www.fau.eu/studying/international-students/students-on-exchange-programs/application-process/#which-language-requirements-do-i-have-to-meet-before-i-can-apply\n  ** Faculty of Humanities, Social Sciences, and Theology requires German proficiency.","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Sep","홈페이지":"(대학) https://www.fau.eu/\n(교환학생) https://www.fau.eu/studying/international-students/students-on-exchange-programs/\n(강의정보) www.campus.fau.de\n(주거정보) https://www.werkswelt.de/index.php?id=infos-zur-sok-aufnahme&setlang=en","인기":true,"미달횟수":0,"최고차수":1,"합격인원":2},{"대학명(국문)":"호헨하임대학","대학명(영문)":"University of Hohenheim","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"771-780","THE 랭킹":"301-350","iBT_커트":72,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 단과대학(전공) 관련 학문적 배경(본/복수전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 6.0\n(독일어) ZD B2","세부사항":"1. 제한사항\n(지원제한) 아래 3개 단과대학(전공)에만 지원, 소속 가능\n- Faculty of Agriculture\n- Faculty of Natural Sciences\n- Faculty of Business, Economics and Social Sciences\n(수강제한) Students have to ensure that they meet all individual prerequisites for the modules they wish to attend.","파견대학 학사력":"· Winter : Sep-Mar\n· Summer : Mar-Jul","홈페이지":"(대학) https://www.uni-hohenheim.de/en/\n(단과대학) https://www.uni-hohenheim.de/en\n(교환학생) https://www.uni-hohenheim.de/en/exchange-students-and-free-movers\n(주거정보) https://www.uni-hohenheim.de/en/housing-at-university-of-hohenheim-for-international-students ","인기":true,"미달횟수":1,"최고차수":2,"합격인원":2},{"대학명(국문)":"시에나외국인대학","대학명(영문)":"University for Foreigners of Siena","파견국":"이탈리아","대륙":"유럽","언어":"이탈리아어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(이탈리아어)\n- (일반 전공강의) CILS B2\n- (이탈리아어 어학과정) 이탈리아어 학습 희망자\n4. 특이사항 :  '인문학부(Dept. of Humanities(DiSU)'가 해당 대학의 유일한 단대/학부로, 산하에 학부 및 대학원 각 2개 과정 운영 중","세부사항":"1. 제한사항\n(원어강의) CILS B2 이상 성적 보유자만 학위과정 일반 전공강의 수강 가능\n  ※ CILS B2 미만 성적으로 지원할 경우, 파견 대학의 외국어 강의 또는 이탈리아어 어학과정를 수강하고 학점 취득 가능\n(수강제한) Exchange students are allowed to take classes from different degrees but they are excluded to take courses from our online degree course “Italian language, literature and arts in an international perspective\"","파견대학 학사력":"· 1st : Sep-Jan\n· 2nd : Feb-May","홈페이지":"(대학) https://www.unistrasi.it/\n(교환학생) https://en.unisi.it/international/international-exchange-students\n(강의정보)\n* 전공과정: https://cluss.unistrasi.it/1/50/88/Corsi_ordinari_di_lingua_italiana.htm\n* 어학과정: https://cluss.unistrasi.it/1/50/88/Corsi_di_lingua_italiana.htm\n(주거정보) We help students in finding accommodation for their exchange period. For further information please contact accoglienza@unistrasi.it","인기":false,"미달횟수":4,"최고차수":3,"합격인원":2},{"대학명(국문)":"스트래스클라이드대학","대학명(영문)":"University of Strathclyde ","파견국":"영국","대륙":"유럽","언어":"영어","QS Ranking":230,"THE 랭킹":"351-400","iBT_커트":80,"IELTS_커트":6.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 단과대학(전공) 관련 학문적 배경(본/복수전공) 필요\n2. 성적기준 : 평점평균 4.5 기준 3.5 이상\n3. 어학기준 :\n(영어) IELTS 6.5 (각 영역 5.5), TOEFL iBT 80(S 20, R 18, L 17, W 18)\n  ※ '26.01.21. 이후 TOEFL iBT 5(각 영역 4.0)","세부사항":"(제한사항)\nSpeech & Language Pathology is not open to exchange students, Chemistry is full year only. \n\n(연속파견 제한) 파견대학 규정에 따라, 동일 학년도(Academic Year) 내에서만 재지원(=재선발=파견 연장) 가능\n※  본교 기준 2학기에 최초 파견된 학생만 다음 학기(1학기)에 동일대학 재지원(파견 연장) 가능","파견대학 학사력":"· 1st: Sep-Dec\n· 2nd: Jan-May","홈페이지":"(대학) https://www.strath.ac.uk\n(교환학생) https://www.strath.ac.uk/studywithus/studyabroad/comingtostrathclyde/studyabroadatstrathclyde/\n(강의정보) https://www.strath.ac.uk/studywithus/studyabroad/comingtostrathclyde/academicinformation/guidetochoosingclasses/\n(주거정보)https://www.strath.ac.uk/studywithus/accommodation/exchangestudents/","인기":true,"미달횟수":0,"최고차수":0,"합격인원":2},{"대학명(국문)":"큐슈대학","대학명(영문)":"Kyushu University","파견국":"일본","대륙":"아시아","언어":"영어/일어","QS Ranking":170,"THE 랭킹":"301-350","iBT_커트":79,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.7 이상\n3. 어학기준 : 영어 또는 일본어 중 택 1\n(영어) TOEFL iBT 79 / IELTS 6.0\n(일본어) JLPT N1","세부사항":"1.제한사항\n(지원제한) Practical courses (e.g. Medicine, Pharmacy, Dental Sciences) are not open to exchange students.\n(수강제한) Courses offered by Kyushu University Business School (QBS) are available only to exchange students officially enrolled in QBS. Undergraduate students are not permitted to enroll in graduate-level courses.\n(영어강의) Undergraduate Programs conducted in English are below: \n- School of Engineering (Applied Chemistry/ Civil Engineering/ Electrical Engineering and Computer Science/ Mechanica Engineering)\n- School of Agriculture (Bioresource and Bioenvironment)\n- School of Interdisciplinary Science and Innovation\n* [NOTE] Please be sure to check if there are enough English courses to take before application since there are no or very limited number of courses in some study field.","파견대학 학사력":"· 1st : Apr-Aug\n· 2nd : Oct-Feb","홈페이지":"(대학) https://www.kyushu-u.ac.jp/en/\n(교환학생) https://www.isc.kyushu-u.ac.jp/intlweb/en/admission/exchangetop\n(강의정보)\n - https://isc.kyushu-u.ac.jp/center/international/japaneselang/\n - https://www.isc.kyushu-u.ac.jp/intlweb/en/student/english","인기":true,"미달횟수":0,"최고차수":1,"합격인원":2},{"대학명(국문)":"서식스대학","대학명(영문)":"University of Sussex","파견국":"영국","대륙":"유럽","언어":"영어","QS Ranking":273,"THE 랭킹":"201-250","iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.3 이상\n3. 어학기준 :\n(영어) \n - TOEFL iBT 80(L 17, R 18, S 20, W 17) / IELTS 6.0(각 영역 5.5)\n * TOEFL IBT '26.1.21. 이후 성적 취득자: overall 4 (L 4, R 4, S 4, W 4)\n  ※ 모든 어학성적은 개강월 기준 2년 이내의 성적만 인정\n  ※ TOEFL Home Edition 인정 가능\n  ※ IELTS One Skill Retake로 지원 가능(단, IELTS 6.0 이며 전 영역 5.5)","세부사항":"1. 특이사항\n(유의사항) 특정 모듈(강의)의 경우 별도 자격요건이 있는 경우가 있으므로, 하단 링크에서 확인 후 지원\n  ※ https://www.sussex.ac.uk/study/study-abroad-at-sussex/our-programs","파견대학 학사력":"· Autumn : Sep-Jan\n· Spring : Jan-May","홈페이지":"(대학) https://www.sussex.ac.uk/\n(교환학생) https://www.sussex.ac.uk/study/study-abroad-at-sussex\n(주거정보) https://www.sussex.ac.uk/study/study-abroad-at-sussex/accommodation","인기":true,"미달횟수":0,"최고차수":1,"합격인원":2},{"대학명(국문)":"툴루즈장조레스대학","대학명(영문)":"University of Toulouse-Jean Jaurès","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":"1201-1400","THE 랭킹":"-","iBT_커트":42,"IELTS_커트":4.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 인문사회계열(Human and social sciences/ Languages/ Arts) 본/복수전공 필요\n2. 성적기준 : 평점평균 4.5만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 42 / TOEFL ITP 460 / IELTS 4.5\n(프랑스어)\n- (정규 학위과정) DELF B1\n- (DEFLE 프랑스어 어학과정) 프랑스어 학습 희망자","세부사항":"1. 제한사항\n(어학과정) 파견대학 기준 2학기(2nd) 지원 학생은 최소 A1 이상의 프랑스어 실력을 갖추어야 함\n  ※ 파견대학 기준 1학기(1st) 지원 학생은 관계 없음","파견대학 학사력":"· 1st : Sep-Jan\n· 2nd : Jan-Jun","홈페이지":"(대학) https://international.univ-tlse2.fr/home\n(교환학생) https://international.univ-tlse2.fr/home/academics/student-exchange-program-erasmus-bilateral-agreement\n(강의정보) https://international.univ-tlse2.fr/accueil/formation/courses-taught-english-ut2j","인기":true,"미달횟수":0,"최고차수":1,"합격인원":2},{"대학명(국문)":"가나자와대학","대학명(영문)":"Kanazawa University","파견국":"일본","대륙":"아시아","언어":"영어/일어","QS Ranking":"1001-1200","THE 랭킹":"801-1000","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEIC L&R 700 / IELTS 5.5\n＊TOEFL IBT('26.01.21. 이후) overall 4\n(일본어) JLPT N2 이상 \n※대학원생일 경우 특정분야는 JLPT N1 충족해야 함(세부사항 지원자격 참고)","세부사항":"1. 제한사항\n(지원제한) \n A. Applicants who wish to enroll in the College of Transdisciplinary Sciences for Innovation, the College of Science and Engineering, and the College of Medical, Pharmaceutical and Health Sciences must be in their third year or higher of an undergraduate course at the time of arrival in Japan.\n\n B. Applicants who wish to enroll in the College of Science and Engineering, the College of Medical, Pharmaceutical and Health Sciences, the Graduate School of Natural Science and Technology, the Graduate School of Medical Sciences or the Graduate School of Advanced Preventive Medical Sciences must be students at a college or graduate school of their home university that corresponds to the respective host department and must have the ability and knowledge to take part in specialized research.\n\n(지원자격)\nApplicants wishing to enroll in the Graduate Program in Japanese Language Education and Japanese Studies must have Japanese language proficiency equivalent to JLPT N1.","파견대학 학사력":"· Spring semester : Apr-Sep\n (Quarter 1, Quarter 2)\n· Fall semester : Oct-Mar\n (Quarter 3, Quarter 4)","홈페이지":"(대학) https://www.kanazawa-u.ac.jp/en\n(교환학생) https://www.kanazawa-u.ac.jp/en/global-network/study/kuep/\n(강의정보) https://eduweb.sta.kanazawa-u.ac.jp/portal/Public/Syllabus/SearchMain.aspx\n(주거정보) https://www.kanazawa-u.ac.jp/en/global-network/study/kuep/others/#housing","인기":true,"미달횟수":0,"최고차수":0,"합격인원":2},{"대학명(국문)":"교토부립대학","대학명(영문)":"Kyoto Prefectural University","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"-","THE 랭킹":"1001-1200","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 550 / IELTS 5.5 / TOEIC 785\n(일본어) JLPT N2 이상","세부사항":"1. 특이사항\n(파견문의) 해당 대학의 경우 교환학생 관련 자료가 극히 제한되어 있으므로, 더 궁금한 사항이 있는 경우 파견대학 국제처에 직접 문의\n  ※ (담당자) kokusai@kpu.ac.jp","파견대학 학사력":"· Spring : Apr-Sep\n· Fall : Oct-Mar","홈페이지":"(대학) https://www.kpu.ac.jp/university/\n(교환학생) 개별 문의\n(강의정보) 개별 문의","인기":false,"미달횟수":1,"최고차수":3,"합격인원":2},{"대학명(국문)":"히로사키대학","대학명(영문)":"Hirosaki University","파견국":"일본","대륙":"아시아","언어":"영어/일어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) 영어 실력이 유창한 자\n  ※ 별도 기준은 없으나, 영어로 수업(학습)이 가능한 정도여야 함\n(일본어) 일본어 실력이 유창한 자\n  ※ 별도 기준은 없으나, 일본어로 수업(학습)이 가능한 정도여야 함","세부사항":"1. 제한사항\n(수강제한) It is not possible to take specialized courses offered by the Faculty of Medicine. Most general education and undergraduate specialized courses are conducted in Japanese.\n2. 특이사항\n(일본어) There are no restrictions on Japanese language proficiency, but we prefer students who have at least a JLPT N4 level of Japanese proficiency.","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Oct-Feb","홈페이지":"(대학) https://www.hirosaki-u.ac.jp/en/\n(교환학생) https://www.kokusai.hirosaki-u.ac.jp/ko/studyabroad02/sa02_page1/\n(강의정보) https://www.kokusai.hirosaki-u.ac.jp/wp-content/uploads/2026/05/%E5%86%8D%E7%B7%A8%E2%98%85%E2%98%85%E2%98%85%E4%BB%A4%E5%92%8C%EF%BC%98%E5%B9%B4%E5%BA%A6%E7%9F%AD%E6%9C%9F%E7%95%99%E5%AD%A6%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%A0%E6%8E%88%E6%A5%AD%E7%A7%91%E7%9B%AE%E3%82%B7%E3%83%A9%E3%83%90%E3%82%B9-1.pdf\n  ※ 2026년 기준 자료이므로, 참고용으로만 사용할 것\n(주거정보) https://www.hirosaki-u.ac.jp/campuslife/consultation/gakuryo/","인기":false,"미달횟수":1,"최고차수":3,"합격인원":2},{"대학명(국문)":"프랑크푸르트 괴테대학","대학명(영문)":"Goethe University Frankfurt","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":376,"THE 랭킹":"201-250","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 :\n(영어) \n - 정규과정: TOEFL iBT 72 / IELTS 5.5\n - GSTEP program: TOEFL IBT 80 / IELTS 6.0 \n(독일어) ZD B1 \n4. 특이사항\n - GSTEP program 지원자는 6학기 이상 이수 학생만 지원 가능 \n - 전공에 따라 어학성적 기준 다를 수 있음(상향). 전공별 세부사항 확인 바람\n  (참고) https://www.uni-frankfurt.de/122913225/Before_your_Mobility_to_Frankfurt#InfoFb","세부사항":"1. 제한사항\n(지원제한) The minimum is usually English B2, with some exceptions where a higher level is required.\n(수강제한) Students may take courses from other departments if those departments agree. Language of instruction at Goethe University is mostly German. Nevertheless, a limited number of faculties offer courses in English.\n\n(수강신청) GSTEP program is entirely in English.\nhttps://www.uni-frankfurt.de/172981208/Goethe_Study_Experience_Program#gstep","파견대학 학사력":"· Winter : Oct–Mar\n· Summer : Apr–Sep","홈페이지":"(대학) https://www.uni-frankfurt.de/en\n(교환학생) https://www.uni-frankfurt.de/122913225/Before_your_Mobility_to_Frankfurt\n(강의정보) https://www.uni-frankfurt.de/122913225/Before_your_Mobility_to_Frankfurt?#CourseSelection\n(영어강의) https://www.uni-frankfurt.de/122913225/Before_your_Mobility_to_Frankfurt#EnglishCourses\n(주거정보) https://www.uni-frankfurt.de/122913225/Before_your_Mobility_to_Frankfurt#Accommodation","인기":true,"미달횟수":0,"최고차수":0,"합격인원":2},{"대학명(국문)":"라드바우드대학","대학명(영문)":"Radboud University","파견국":"네덜란드","대륙":"유럽","언어":"영어","QS Ranking":283,"THE 랭킹":154,"iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 80 ('26.01.21. 이후 4.0) / IELTS 6.0(각 영역 최소 6.0) / TOEIC 865\n","세부사항":"1. 제한사항\n(수강제한) Exchange students may choose courses primarily from their host faculty. Access to courses in other faculties may be restricted and is subject to approval by the relevant faculty.\n※ 각 단과대학별 제한사항 확인 바람\nhttps://www.ru.nl/en/education/more-education-and-training/courses-for-exchange-students/exchange-courses-and-contact-information\n(어학기준)\n- Faculty of Arts(Department of English and America Studies) 등 기준 상이, 아래 링크에서 확인\n- https://www.ru.nl/en/education/application-and-admission/language-requirements/english-language-requirements/minimum-test-scores-exchange-students","파견대학 학사력":"· 1st : Aug-Jan\n· 2nd : Jan-Jul","홈페이지":"(대학) www.ru.nl\n(교환학생) https://www.ru.nl/en/education/more-education-and-training/courses-for-exchange-students\n(강의정보) https://www.ru.nl/en/education/more-education-and-training/courses-for-exchange-students/exchange-courses-and-contact-information\n(주거정보) https://www.ru.nl/en/students/international-students/housing","인기":false,"미달횟수":1,"최고차수":3,"합격인원":2},{"대학명(국문)":"사가대학","대학명(영문)":"Saga University","파견국":"일본","대륙":"아시아","언어":"영어/일어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.3 이상\n3. 어학기준 :\n  ※ SPACE-SAGA/SE/ARITA/AG 지원자\n     (영어) TOEFL iBT 72 / TOEFL ITP 530 / IELTS 5.5 / TOEIC 740 \n  ※ SPACE-ECON/General Exchange Student 지원자\n     (일본어) JLPT N2\n4. 특이사항 : \"SPACE-SE/ARITA/AG\" 프로그램은 파견시점 기준 3학년 이상(4학기 이상 이수) 학생만 지원 가능","세부사항":"1. 제한사항\n(지원제한) Faculty of medicine doesn't offer any courses for exchange students\n(가능전공) 아래 링크를 통해 지원 가능 전공 및 전공별 강의언어 확인\n  ※ https://www.irdc.saga-u.ac.jp/en/foreignstudent/space/\n","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Oct-Feb","홈페이지":"(대학) https://www.saga-u.ac.jp/\n(교환학생) https://www.irdc.saga-u.ac.jp/foreignstudent/space/\n(강의정보) https://www.irdc.saga-u.ac.jp/foreignstudent/space/\n(주거정보) https://www.irdc.saga-u.ac.jp/foreignstudent/dormitory/","인기":false,"미달횟수":2,"최고차수":3,"합격인원":2},{"대학명(국문)":"강남대학","대학명(영문)":"Jiangnan University","파견국":"중국","대륙":"아시아","언어":"중국어","QS Ranking":"851-900","THE 랭킹":"601-800","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.3 이상\n3. 어학기준 :\n(중국어 어학과정) 중국어 학습 희망자","세부사항":"(해당없음)","파견대학 학사력":"· 1st : Apr-Aug\n· 2nd : Oct-Feb","홈페이지":"(대학) https://english.jiangnan.edu.cn/index.htm\n(교환학생) https://english.jiangnan.edu.cn/ADMISSIONS/Student_Exchange_Programs.htm","인기":false,"미달횟수":3,"최고차수":3,"합격인원":2},{"대학명(국문)":"화동사범대학","대학명(영문)":"East China Normal University","파견국":"중국","대륙":"아시아","언어":"중국어","QS Ranking":563,"THE 랭킹":"301-350","iBT_커트":85,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 85 / IELTS 6.0 이상\n(중국어)\n- (정규 학위과정) HSK 5급(총점 180 ) \n ※ (School of International Chinese Studies, School of Design) : HSK 4급(총점 180 ) 이상\n- (중국어 어학수업) 중국어 학습 희망자","세부사항":"1. 제한사항\n(지원제한) department/major/courses regarding Economy and Management, which will not be offered to exchange students","파견대학 학사력":"· Fall : Sep-Jan\n· Spring : Feb-Jul","홈페이지":"(대학) https://lxs.ecnu.edu.cn/\n(교환학생) https://lxs.ecnu.edu.cn/en_admission_exchange_programs_programs_introduction/list.htm\n(강의정보) https://lxs.ecnu.edu.cn/en_admission_exchange_programs_programs_introduction/list.htm\n(주거정보) https://lxs.ecnu.edu.cn/cn/accommodation/list.htm","인기":false,"미달횟수":1,"최고차수":3,"합격인원":2},{"대학명(국문)":"상해교통대학","대학명(영문)":"Shanghai Jiao tong University","파견국":"중국","대륙":"아시아","언어":"중국어","QS Ranking":36,"THE 랭킹":40,"iBT_커트":90,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수\n2. 성적기준 : 평점평균 4.5만점 기준 3.5이상\n3. 어학기준 : 영어 또는 중국어 중 택 1\n(영어) TOEFL iBT 90 ('26.1.21.이후 5.0) / IELTS 6.0\n(중국어) HSK 5급(원본 성적표 제출 필수)\n4. 특이사항 :  중국 국적자 지원 불가, 소속대학에서 2학기 이상 이수자 지원 가능","세부사항":"(제한사항) \n1. All courses from the School of Medicine and Shanghai Advanced Institute of Finance are not available to university-level exchange students.\n2. School of Computer Science, School of Electrical Engineering, School of Automation and Intelligent Sensing, School of Integrated Circuits (School of Information Science and Electronic Engineering): The number of vacancies for these courses is highly limited due to the current capacity issue. You must be able to take courses in Chinese, and you must achieve a grade of no less than 80 points in each course on your academic transcript.\n3. The application for Antai College of Economics and Management is highly competitive, and applicants must have an academic background in economics and management-related disciplines.\n4. Some schools, such as the School of International and Public Affairs/KoGuan Law School etc., do not offer undergraduate courses taught in English.If you choose these schools, you can select the English-taught graduate programs offered by the school.\n5. Not all graduate courses are available to undergraduate exchange students, and vice versa.","파견대학 학사력":"· Fall : Sep-.Jan\n· Spring : Feb-July","홈페이지":"(대학) https://global.sjtu.edu.cn/en/\n(교환학생) https://global.sjtu.edu.cn/en/study-sjtu/prospective/non-degree-programs/281\n","인기":true,"미달횟수":1,"최고차수":2,"합격인원":2},{"대학명(국문)":"큐슈공업대학","대학명(영문)":"Kyushu Institute of Technology","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"1201-1400","THE 랭킹":"1201-1500","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 특정 전공(단과대학)에만 지원 및 소속 가능하며, 지원 분야 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 : 지원 전공 및 학위과정 별로 상이\n(School of Engineering)\n - (영어) 지원 불가(영어강의 無)\n - (일본어)  학부 및 대학원, JLPT N2 \n(School of Computer Science and Systems Engineering)\n - (영어) 지원 불가(영어강의 無)\n - (일본어)  학부 및 대학원, JLPT N2 \n(Graduate School of Life Science and Systems Engineering)\n - (일본어) 제한없음","세부사항":"1. 제한사항\n(가능전공) School of Engineering/ School of Computer Science and Systems Engineering/ Graduate School of Life Science and Systems Engineering\n(파견지역) Please inquire when students apply for since it depends on the campus.","파견대학 학사력":"· Spring : Apr-Sep\n· Fall : Oct-Mar","홈페이지":"(대학) https://www.kyutech.ac.jp/english/\n(교환학생 ) https://www.kyutech.ac.jp/english/international-exchange/\n(강의정보)\n A. School of Engineering\n  - https://edragon-syllabus.jimu.kyutech.ac.jp/guest/syllabuses\n  - https://www.kyutech.ac.jp/english/academics/e/\n  - https://www.tobata.kyutech.ac.jp/gr-school/gra-program/\n B. School of Computer Science and Systems Engineering\n  - https://edragon-syllabus.jimu.kyutech.ac.jp/guest/syllabuses\n C. Graduate School of Life Science and Systems Engineering\n  - https://www.lsse.kyutech.ac.jp/english/departments/\n  - http://www.lsse.kyutech.ac.jp/english/education/curriculum.html\n(주거정보) https://www.kyutech.ac.jp/english/campuslife/kih.html","인기":false,"미달횟수":3,"최고차수":3,"합격인원":2},{"대학명(국문)":"올덴부르크대학","대학명(영문)":"University of Oldenburg\n(Carl von Ossietzky Universität Oldenburg)","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"1001-1200","THE 랭킹":"351-400","iBT_커트":42,"IELTS_커트":4,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 42 / TOEFL ITP 460 / IELTS 4.0 / TOEIC L&R 550, S 120, W 120(2개 시험 성적표 전체 제출)\n  ※ 아래 단대/전공의 경우 보다 상향된 어학기준 충족 필요\n  A. Department for English Studies/Education/European Studies) : TOEFL iBT 72 또는 TOEFL ITP 543 / IELTS 5.5 \n(독일어) Zertifikat Deutsch(ZD) B1 이상\n  ※ German Studies 관련 과목 수강 희망자의 경우, ZD B2 이상","세부사항":"1, 제한사항\n(지원제한) Medicine 등 파견대학의 fee-paying 전공 소속/수강 불가\n(수강제한) we need to identify one major subject to enrol the students (previous knowledge of the subject is mandatory), but students may also join courses from other areas (previouis knowledge is usually required as well)","파견대학 학사력":"· Fall : Oct-Mar\n· Spring : Mar-Aug","홈페이지":"(대학) https://uol.de/en\n(교환학생) https://uol.de/en/exchange-studies\n(강의정보) https://elearning.uni-oldenburg.de/plugins.php/veranstaltungsverzeichnis_lvsg/englishmodules?cancel_login=1\n(주거정보) https://uol.de/en/study-in-oldenburg/organise-your-stay/finding-accomodation-1","인기":true,"미달횟수":0,"최고차수":1,"합격인원":2},{"대학명(국문)":"부르고스대학","대학명(영문)":"University of Burgos","파견국":"스페인","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"1201-1500","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5\n(스페인어) DELE B1","세부사항":"1. 제한사항\n(수강제한) Students cannot take Final Degree Projects or Internships unless agreed by academic coordinator.\n※ Students are restricted to taking English taught courses or English Friendly Programme courses if they cannot certify a B1 level of Spanish.","파견대학 학사력":"· 1st : Sep-Jan\n· 2nd : Feb-Jun","홈페이지":"(대학) https://www.ubu.es/english-version\n(교환학생) https://www.ubu.es/english-version/international-students\n(강의정보) https://www.ubu.es/english-version/international-students/academic-offer-courses-available-english-english-friendly-courses/courses-available-english-language-and-english-friendly\n(주거정보) https://www.ubu.es/english-version/international-students/ects-guide-practical-information-about-burgos-and-ubu-foreign-students-and-visitors/accommodation","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"칸세이가쿠인대학","대학명(영문)":"Kwansei Gakuin University","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 : \n(영어) TOEFL IBT 71\n- (가능 프로그램) Modern Japan Track(MJT)\n(일본어) 일본어 실력이 유창한 자(별도 기준은 없으나, 일본어로 수업(학습)이 가능한 정도여야 함\n- (정규 학위과정) : JLPT N1 \n- (가능 프로그램) Japanese Language Track(JLT)","세부사항":"1. Two Track 프로그램\nThere are two study tracks available within the CJP. Students can choose one of the following study tracks.\n- Japanese Language Track(JLT), for students who wish to focus on their Japanese language studies  \n- Modern Japan Track(MJT), for students who wish mainly to learn about Japan via English-taught courses through a variety of subjects\n2. 정규 대학 수업\nAn extremely high level of Japanese language ability is required in order to take Regular University Courses taught in Japanese. Exchange students who meet one of the requirements below are eligible to register for Regular University Courses\n- Submit proof of having passed the Japanese Language Proficiency Test (JLPT) N1 before the beginning of the semester.\n- Receive a score of Level 8 in the Japanese Placement Test before the beginning of the semester.\n ※ Undergraduate students can only take courses offered at the undergraduate level. Graduate students can only take courses offered at the graduate level.","파견대학 학사력":"· Spring : Apr-July\n· Fall : Sep-Feb","홈페이지":"(대학) https://www.kwansei.ac.jp/ko/\n(교환학생) https://ciec.kwansei.ac.jp/study/exchange/\n(강의정보) https://ciec.kwansei.ac.jp/study/exchange/outline/pdf/CJP%20Brochure%20(2026-2027)%20(PDF).pdf\n(주거정보) https://ciec.kwansei.ac.jp/page/accommodation.html","인기":true,"미달횟수":0,"최고차수":0,"합격인원":1},{"대학명(국문)":"레이크헤드대학","대학명(영문)":"Lakehead University","파견국":"캐나다","대륙":"북미","언어":"영어","QS Ranking":"-","THE 랭킹":"1001-1200","iBT_커트":72,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / IELTS 6.0 ","세부사항":"(수강제한)Restricted programs: Nursing, Law, and most Social Work and Education courses. Master's and PhD level courses are limited.\n\n(연속파견 제한) 파견대학 규정에 따라, 동일 학년도(Academic Year) 내에서만 재지원(=재선발=파견 연장) 가능\n※  본교 기준 2학기에 최초 파견된 학생만 다음 학기(1학기)에 동일대학 재지원(파견 연장) 가능","파견대학 학사력":"· Fall : Sep-Dec\n· Winter : Jan-Apr","홈페이지":"(대학) https://www.lakeheadu.ca/\n(교환학생) https://www.lakeheadu.ca/international/globalme/inbound\n(강의정보) https://www.lakeheadu.ca/timetable\n(주거정보) https://www.lakeheadu.ca/students/student-life/residence","인기":true,"미달횟수":0,"최고차수":1,"합격인원":1},{"대학명(국문)":"레이던대학,\n인문대학","대학명(영문)":"Leiden University,\nFaculty of Humanities","파견국":"네덜란드","대륙":"유럽","언어":"영어","QS Ranking":119,"THE 랭킹":70,"iBT_커트":90,"IELTS_커트":6.5,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 90 / IELTS 6.5\n4. 특이사항 : 파견시점 기준 3학년 이상(4학기 이상 이수) 학생만 지원 가능","세부사항":"1. 제한사항\n(수강가능분야) Arts, Media and Society/ Dutch Studies/ International Studies/ Linguistics/ Philosophy: Global and Comparative Perspectives/ South and Southeast Asian Studies/ Urban Studies 등\n※ (강의정보) 홈페이지 반드시 참고\n(수강신청) Students must take a minimum of 15 ECTS per semester in Humanities courses, LUC courses are not available, Psychology accepts a max of 5 ECTS.","파견대학 학사력":"· 1st : Sep-Jan\n· 2nd : Feb-Jun","홈페이지":"(대학) https://www.student.universiteitleiden.nl/en/\n(인문대학) https://www.universiteitleiden.nl/en/humanities\n(교환학생) https://www.universiteitleiden.nl/en/education/admission-and-application/exchange\n(강의정보) https://studiegids.universiteitleiden.nl/en/search?for=courses&ec-min=&ec-max=&faculty%5B%5D=2&city%5B%5D=1&city%5B%5D=2&level%5B%5D=100&level%5B%5D=200&level%5B%5D=300&q=exchange&edition=2025-2026\n(주거정보) https://www.universiteitleiden.nl/en/education/international-students/prepare-your-stay/housing?_ga=2.256148552.252457389.1568618378-1935923827.1543249493","인기":true,"미달횟수":0,"최고차수":1,"합격인원":1},{"대학명(국문)":"동경해양대학","대학명(영문)":"Tokyo University of Marine Science and Technology","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"-","THE 랭킹":"1501+","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5 / TOEIC 785\n(일본어) JLPT N2","세부사항":"1. 제한사항\n(수강제한)\nExchange students may not enroll in English language courses and some practical/laboratory courses. Most undergraduate courses are taught in Japanese. While it is possible to take courses in departments other than your own, since campuses vary by department and major, we recommend choosing a department or major that offers many of the courses you wish to take.","파견대학 학사력":"· 1st : Apr-Jul\n· 2nd : Sep-Jan","홈페이지":"(대학) https://www.kaiyodai.ac.jp/en/\n(교환학생) https://www.kaiyodai.ac.jp/en/international/foreignstudents/\n(주거정보) https://www.kaiyodai.ac.jp/en/campuslife/dormitory/","인기":true,"미달횟수":0,"최고차수":0,"합격인원":1},{"대학명(국문)":"매니토바대학,\n애스퍼 경영대학","대학명(영문)":"University of Manitoba,\nAsper School of Business","파견국":"캐나다","대륙":"북미","언어":"영어","QS Ranking":560,"THE 랭킹":"501-600","iBT_커트":86,"IELTS_커트":6.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 상경계열 본/복수/부전공\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 86(각 영역 20) /'26.01.21 이후 TOEFL iBT 4.5(각 영역 4.0)\n        IELTS 6.5(각 영역 6.0)\n  ※ TOEFL Home Edition 및 IELTS One Skill Retake 점수 제출 가능","세부사항":"1. 제한사항\n(수강제한)\n A. Students are recommended to take courses only at Asper, and required to take a minimum of 2 courses at Asper.\n B. Exchange students can select most courses offered at Asper during their exchange semester, as long as the student meets pre requisite requirements and there is space available in the course. Some courses may require professor approval for enrolment.\n C. Students may take courses outside of the Asper School of Business, such as in Economics, Psychology or History, but approval is subject to these departments, and may be hard to access. We encourage students to take courses offered at Asper.","파견대학 학사력":"· Fall : Sep-Dec\n· Winter : Jan-Apr","홈페이지":"(대학) https://umanitoba.ca/\n(단과대학) https://umanitoba.ca/asper/\n(교환학생) https://umanitoba.ca/asper/student-experience/asper-exchange-program#inbound-students-coming-to-asper\n(강의정보) https://umanitoba.ca/asper/programs-of-\nstudy/majors-and-required-courses\n(주거정보) https://umanitoba.ca/housing","인기":true,"미달횟수":0,"최고차수":1,"합격인원":1},{"대학명(국문)":"네오마경영대학","대학명(영문)":"NEOMA Business School","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":72,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 경영학 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 6.0\n(프랑스어) DELF B2 ","세부사항":"1. 제한사항\n(수강제한) please pay attention to the level and pre-requisites required for each course: indicated in the course catalogue; pre-requisites featured in the course descriptions.\n(수강신청) Bear in mind that course selection is on a first come, first served basis.\n2. 특이사항\n캠퍼스(Reims/Rouen)에 따라 개설 과목이 다르므로, 각 캠퍼스에서 개설되는 과목만 수강할 수 있음.","파견대학 학사력":"","홈페이지":"(교환학생) https://neoma-bs.com/welcome-to-neoma/steps\n(강의정보) https://neoma-bs.com/welcome-to-neoma/steps/step-4-courses\n(주거정보) https://neoma-bs.com/welcome-to-neoma/steps/step-3-housing","인기":true,"미달횟수":0,"최고차수":0,"합격인원":1},{"대학명(국문)":"난양기술대학","대학명(영문)":"Nanyang Technological University","파견국":"싱가포르","대륙":"아시아","언어":"영어","QS Ranking":12,"THE 랭킹":31,"iBT_커트":90,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 :\n(영어) TOEFL iBT 90 ('26.01.21.이후, overall 4.5 (S 영역 4.5)) / IELTS 6.0(W 영역 6) \n","세부사항":"1. 제한사항\n(국적제한) 싱가포르 국적자 지원 불가\n(지원제한) College of Computing and Data Science(CCDS), Nanyang Business School (NBS)\n(수강제한) 강의정보 \"Course Matters\" 페이지 내 \"Restricted Programmes and Courses\" 등을 참고하여 파견대학 현황, 규정 등 숙지 요망\n * Refer to Course Restriction List\n - https://gem.ntu.edu.sg/_customtags/ct_DocumentRetrieve.cfm?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXlsb2FkIjp7InRpbWVzdGFtcCI6IjIwMjItMDktMzBUMDU6NTc6NTIiLCJleHBpcmVMaW5rIjpmYWxzZSwiZmlsZUlkIjo0Mjg5MH19.BK8ZIaVIptHirlaPXIcVrCF2hlSRke5Bl2DLv_1BRrA ","파견대학 학사력":"· Fall : Aug-Dec\n· Spring : Jan-May","홈페이지":"(대학) http://www.ntu.edu.sg\n(교환학생) https://gem.ntu.edu.sg/index.cfm?FuseAction=Programs.ViewProgramAngular&id=10006\n(강의정보) https://gem.ntu.edu.sg/_customtags/ct_FileRetrieve.cfm?File_ID=21429\n(주거정보) https://gem.ntu.edu.sg/index.cfm?FuseAction=Programs.ViewProgramAngular&id=10006","인기":true,"미달횟수":0,"최고차수":0,"합격인원":1},{"대학명(국문)":"국립정치대학","대학명(영문)":"National Chengchi University","파견국":"대만","대륙":"아시아","언어":"영어","QS Ranking":613,"THE 랭킹":"1201-1500","iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.25 이상\n3. 어학기준 :\n(영어) TOEFL iBT 80 / IELTS 6.0 / TOEIC 700 \n(중국어) HSK Level 4 \n   ※ 일부단과대학은 더 높은 중국어 능력 요구 가능(College of Informatics, College of Science 등) ","세부사항":"1. 제한사항\n(수강제한)\n A. exchange students may take courses across departments, except for the ones offered by the following departments: International Master’s Program in Asia-Pacific Studies (IMAS)/ International Master of Business Administration (IMBA)/ Executive Master of Business Administration (EMBA)/ College of Global Banking and Finance/ On-Job Training Programs/ Extended Minor Course with credit fee/ The department of the students’ native language (e.g., Korean students cannot take courses offered by the Department of Korean Language and Culture).\n2. 특이사항\n(추가심사) 대학원생의 경우, 파견대학 별도 심사에 의해 전공 수강 허용 여부 결정","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Oct-Feb","홈페이지":"(대학) https://www.nccu.edu.tw/\n(교환학생) https://oic.nccu.edu.tw/\n(강의정보) https://qrysub.nccu.edu.tw/","인기":false,"미달횟수":4,"최고차수":3,"합격인원":1},{"대학명(국문)":"시드니공과대학","대학명(영문)":"University of Technology Sydney","파견국":"호주","대륙":"오세아니아","언어":"영어","QS Ranking":96,"THE 랭킹":145,"iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 : 지원 전공 또는 수강 희망 강의별 요건을 충족하는 TOEFL iBT 또는 IELTS 성적\n  ※ 세부사항 내 (어학기준)의 안내 및 관련 링크를 통해 어학기준 총족여부를 반드시 확인 후 지원","세부사항":"1. 제한사항\n(어학기준) 아래 링크를 참고하여, 본인이 지원하는 전공 또는 수강하고자 하는 수업별로 requirements에 명시된 어학요건 충족여부 확인\n  ※ (링크) https://www.uts.edu.au/study/international/essential-information/english-language-requirements","파견대학 학사력":"· Autumn : Sep-Dec\n· Spring : Jan-Apr","홈페이지":"(대학) https://www.uts.edu.au/\n(교환학생) https://www.uts.edu.au/study/international\n(강의정보) https://www.uts.edu.au/study/international/study-abroad-and-exchange-uts/subjects-and-academic-information\n(주거정보) https://www.uts.edu.au/for-students/current-students/support/uts-housing-service/apply-uts-housing","인기":false,"미달횟수":2,"최고차수":3,"합격인원":1},{"대학명(국문)":"뉴사우스웨일즈대학","대학명(영문)":"University of New South Wales","파견국":"호주","대륙":"오세아니아","언어":"영어","QS Ranking":19,"THE 랭킹":"79\n(2026)","iBT_커트":90,"IELTS_커트":6.5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 90 / IELTS 6.5 ","세부사항":"1. 제한사항\n(수강불가) \nMBA Coursework Courses/ Courses that are part of the Honours degree (4xxx)/UNSW Canberra and the Australian Defence Force Academy (all courses starting with 'Z'/UNSW College Doctor of Medicine program\n※ (참고) 파견대학 전공/과목별 제한사항 별도 확인 - 하단 링크 \n  - https://sway.cloud.microsoft/LUMxAzRKDvS7n8nE?ref=Link\n\n2. 특이사항\n(파견학기) 본교 기준 1학기 파견자는 파견대학 Term 1에, 2학기 파견자는 파견대학 Term 3에 등록, 이수해야 함","파견대학 학사력":"· Term 1 : Feb-May\n· Term 2 : May-Sep\n· Term 3 : Sep-Dec","홈페이지":"(대학) https://www.unsw.edu.au/\n(교환학생) https://www.unsw.edu.au/study/international-students/study-abroad\n(강의정보) https://sway.cloud.microsoft/LUMxAzRKDvS7n8nE?ref=Link\n(주거정보) https://www.unsw.edu.au/accommodation","인기":true,"미달횟수":0,"최고차수":1,"합격인원":1},{"대학명(국문)":"산동과학기술대학","대학명(영문)":"Shandong University of Science and Technology","파견국":"중국","대륙":"아시아","언어":"중국어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":75,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 :\n(영어) TOEFL iBT 75 / IELTS 6.0\n(중국어)\n- (일반 전공강의) HSK 4급 \n- (중국어 어학과정) 중국어 학습 희망자","세부사항":"1. 특이사항\n(영어강의) chemical engineering and technology, mechatronic engineering, telecommunications engineering, software engineering, civil engineering.","파견대학 학사력":"· 1st : Sep-Jan\n· 2nd : Mar-Jul","홈페이지":"(대학) cie.sdust.edu.cn\n(교환학생) https://cie.sdust.edu.cn/International_Collaborative_Programs/Mobility_Study_Program.htm","인기":false,"미달횟수":4,"최고차수":3,"합격인원":1},{"대학명(국문)":"보르도몽테뉴대학","대학명(영문)":"Bordeaux Montaigne University","파견국":"프랑스","대륙":"유럽","언어":"불어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(프랑스어)\n- (정규 학위과정) DELF B2 \n- (DEFLE 프랑스어 어학과정) 프랑스어 학습 희망자","세부사항":"1. 제한사항\n(수강제한) 정규 학위과정 소속의 경우, 수강 과목의 50% 이상을 전공/소속 과정에서 선택, 수강\n(유의사항) DEFLE 어학과정 소속 여부는 파견 대학에서 최종 결정\n2. 특이사항\n(선발기준) 전체 총점 순으로 선발하되, 어학과정은 학기별 최대 1명 선발","파견대학 학사력":"· 1st : Sep-Dec\n· 2nd : Jan-Apr","홈페이지":"(대학) https://www.u-bordeaux-montaigne.fr/en/\n(교환학생) https://www.u-bordeaux-montaigne.fr/en/study/application/exchange-program.html\n(강의정보) https://www.u-bordeaux-montaigne.fr/en/study/application/exchange-program/organize-your-stay/choose-your-courses.html\n(주거정보) CROUS accommodations near campus (student residences) or private accommodations","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"국립대만대학","대학명(영문)":"National Taiwan University","파견국":"대만","대륙":"아시아","언어":"영어","QS Ranking":54,"THE 랭킹":140,"iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 : \n(영어) TOEFL iBT 72 / IELTS 5.5\n(중국어) HSK Level 5","세부사항":"1. 제한사항\n(국적제한) You should hold a non-Taiwanese passport. Students of Taiwanese nationality alone are not eligible for the exchange program. Only students with dual citizenship, where one is of foreign origin, are eligible for the exchange program. \n(지원제한) Department of Dentistry/ International College/ D-School/ School of Political Science and Economics/ Center for General Education\n※ 이외 별도 제한사항 확인 필요\n- https://isss.ntu.edu.tw/exchange-visiting-students/overview/\n2. 특이사항\n(추가심사) 대학원생의 경우, 파견대학 별도 심사에 의해 전공 수강 허용 여부 결정","파견대학 학사력":"· 1st : Sep-Dec\n· 2nd : Feb-Jun","홈페이지":"(대학) https://oia.ntu.edu.tw/en\n(교환학생) https://isss.ntu.edu.tw/exchange-visiting-students/overview/\n(강의정보) https://course.ntu.edu.tw/en\n(주거정보) https://isss.ntu.edu.tw/campus-life/accommodation/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"베를린자유대학","대학명(영문)":"Free University of Berlin","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":98,"THE 랭킹":113,"iBT_커트":72,"IELTS_커트":"","자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n  ※ 세부사항 내 (제한사항) 참고\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어)\n- (정규 학위과정) TOEFL iBT 72 이상\n(독일어)\n- (정규 학위과정) 인문사회계열 ZD B2 이상/ 이공계열 ZD B1 이상\n- (독일어 어학과정) 독일어 학습 희망자\n  ※ 어학과정으로 지원 시, 영어 및 독일어 정규 학위과정 수업 수강 불가\n  ※ 언어별, 과정별 선발 우선순위는 세부사항 (우대사항) 참고\n4. 특이사항 :  파견시점 기준 3학기 이상 이수 학생만 지원 가능","세부사항":"1. 제한사항\n(수강제한)\n A. Human Medicine/ Veterinary Medicine/ Pharmacy/ Law/ Business administration/ Economics 관계 과목\n  ※  Enrollment in biochemistry, bioinformatics, and biology courses is subject to availability of lab classes and prior approval by the institute/department. \n B. Almost all subjects at undergraduate level are taught in German. Please note that subjects taught in English outside the Departments of English and North American Studies are very limited in number.\n C. Students must have an English language level of C1 to attend courses at the John F. Kennedy Institute for North American Studies. Availability may vary and cannot be guaranteed.\n(참고사항) Almost all subjects at undergraduate level are taught in German.\n2. 특이사항\n(우대사항) 어학성적 보유자를 우선 선발하되, 독일어 지원자를 최우선\n  ※ (1순위) 독일어 어학성적 보유자 > (2순위) 영어 어학성적 보유자 > (3순위) 독일어 학습 희망자\n  ※ 어학성적 외 사항은 내부기준에 따라 배점 부여, 총점순 선발","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Sep","홈페이지":"(대학) https://www.fu-berlin.de/en/\n(교환학생) https://www.fu-berlin.de/en/studium/international/studium_fu/auslandssemester/direktaustausch_in/index.html\n(강의정보) https://www.fu-berlin.de/vv/en/fb\n(세부사항) https://www.fu-berlin.de/studium/international/media/Flyer-Student-Exchange-FU-Berlin.pdf\n(주거정보) https://www.fu-berlin.de/en/sites/unterbringung/index.html","인기":true,"미달횟수":1,"최고차수":2,"합격인원":1},{"대학명(국문)":"파리시떼대학,\n인문사회대학","대학명(영문)":"Paris Cité University,\nFaculty of Humanitites and Social Sciences","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":303,"THE 랭킹":190,"iBT_커트":90,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 90 / IELTS 5.5 / TOEIC 785 \n(프랑스어) DELF B2 ","세부사항":"1. 제한사항\n(수강제한)\n A. Students cannot take courses from other Faculty/Campus\n※ Incoming students enrolled in a school at the \"Grands Moulins\" campus can take courses from other schools of the same campus. Incoming students enrolled in a school from the \"Odeon\" campus can only take courses in the school they are nominated in.\n B. Students must have a language proficiency for the courses they wish to enrol in and will need a certificate to prove it, except for native speakers\n C. if a student wishes to only enrol in courses taught in English, the student will only need to provide a certificate of English language proficiency. If a student wishes to enrol in both English and French taught\ncourses, the student will have to provide English AND French language certificates.\n D. The academic contact holds the right to accept or refuse the enrolment of any student based on their language proficiency.\n2. 특이사항\n- (교명변경) 舊. 파리5대학(데카르트대학)과 파리7대학(디드호대학)이 2019년에 통합하여 출범한 대학","파견대학 학사력":"· Fall : Sep-.Jan\n· Spring : Jan-May","홈페이지":"(대학) https://u-paris.fr/en/\n(교환학생) https://u-paris.fr/societes-humanites/en/incoming-international-students/\n(강의정보) https://u-paris.fr/societes-humanites/en/incoming-international-students/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"제네바대학","대학명(영문)":"University of Geneva","파견국":"스위스","대륙":"유럽","언어":"영어","QS Ranking":168,"THE 랭킹":166,"iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 : \n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5\n(프랑스어) DELF B2 ","세부사항":"1. 제한사항\n(수강제한)\n- Bachelor level students are not allowed to take courses at Master’s level\n- Courses may be chosen from two different Faculties/Institutes at the most\n- Geneva School of Economics and Management, Faculty of Law,\nEnglish Literature/English Linguistics >students must be registered (major) in this field in their home University\n※ 제한사항 확인: https://www.unige.ch/exchange/en/incoming/why-geneva/students/international-non-erasmus-students/2-admission-conditions/restrictions\n\n2. 특이사항: 수업 주요 언어-프랑스어(단, 일부 전공 및 과목은 영어 강의 운영)","파견대학 학사력":"· Fall : Sep-Feb\n· Spring : Feb-Jun","홈페이지":"(대학) https://www.unige.ch/\n(교환학생) https://www.unige.ch/exchange/en/incoming/why-geneva/students/international-non-erasmus-students\n(강의정보) https://pgc.unige.ch/main/home?year=2025&fac=default-value\n(세부사항) https://www.unige.ch/exchange/application/files/9617/6474/9111/UNIGE_Info_sheet_for_students_26-27_Monde.pdf","인기":true,"미달횟수":1,"최고차수":2,"합격인원":1},{"대학명(국문)":"군마대학","대학명(영문)":"Gunma University","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"1201-1400","THE 랭킹":"1501+","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n(일본어) JLPT N2","세부사항":"1. 제한사항\n(수강신청) Most of the undergraduate courses are instructed in Japanese. Students must possess sufficient Japanese-language ability.","파견대학 학사력":"· Spring : Apr-Sep\n· Fall : Oct-Mar","홈페이지":"(대학) https://www.gunma-u.ac.jp/\n(교환학생) https://www.guic.gunma-u.ac.jp/admission/exchange \n(강의정보) https://www.kyomu-sys.gunma-u.ac.jp/Portal/Public/Syllabus/SearchMain.aspx\n(주거정보) https://www.guic.gunma-u.ac.jp/admission/apartment","인기":true,"미달횟수":1,"최고차수":2,"합격인원":1},{"대학명(국문)":"노르웨이과학기술대학","대학명(영문)":"Norwegian University of Science and Technology\n(NTNU)","파견국":"노르웨이","대륙":"유럽","언어":"영어","QS Ranking":264,"THE 랭킹":"301-350","iBT_커트":"","IELTS_커트":6.5,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL IBT 90 / IELTS 6.5 ","세부사항":"1. 제한사항\n(지원제한) \n- 건축(Architecture)/음악(Music) 관련 전공 지원 불가\n- 각 전공별로 지원 자격, 수강 요건 또는 별도의 지원 절차가 적용될 수 있으며, 자세한 내용은 아래 링크의 'Exceptional Procedures'를 참고\n  ※ https://www.ntnu.edu/studies/exchange/how_to_apply\n(수강제한)\n- 과목별 선수지식 및 수강 자격 요건 적용될 수 있으므로, 상세내용 강의정보에서 확인\n  ※ https://www.ntnu.edu/studies/exchange/courses","파견대학 학사력":"· Autumn : Aug-Dec\n· Spring : Jan-Jun","홈페이지":"(대학) https://www.ntnu.edu/\n(교환학생) https://www.ntnu.edu/studies/exchange\n(강의정보) https://www.ntnu.edu/studies/exchange/courses\n(주거정보) https://www.ntnu.edu/lifeandhousing/trondheim/housing","인기":true,"미달횟수":1,"최고차수":2,"합격인원":1},{"대학명(국문)":"밤베르크대학","대학명(영문)":"University of Bamberg\n(Otto-Friedrich-Universität Bamberg)","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"1201-1400","THE 랭킹":"-","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 권장 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어)\n- (정규 학위과정) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5\n(독일어)\n- (정규 학위과정) ZD B2 \n- (독일어 어학과정) ZD A2 \n4. 특이사항 : 파견시점 기준 2학년 이상(2학기 이상 이수) 학생만 지원 가능","세부사항":"1. 제한사항\n(수강제한)\n A. Exchange students can select courses from all faculties.\n B. The only caveats are Business Administration, Communication Science, and Psychology, as students who do not major in these fields need to first contact the individual lecturers to ask whether they may take part in their class.\n(강의언어) Mostly German, some courses are available in English.\n2. 특이사항\n(우대사항)  독일어 지원자 우선 선발\n  ※ 독일어 지원자 2명을 최우선 선발하며(총점 기준, 독일어 지원자 간 제한 경쟁), 그 외 인원은 지원언어와 관계없이 내부기준에 따라 선발 예정 ","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Aug","홈페이지":"(대학) https://www.uni-bamberg.de/en/\n(교환학생) https://www.uni-bamberg.de/en/studies/exchange-students-eg-erasmus/\n(강의정보) https://www.uni-bamberg.de/en/studies/exchange-students-eg-erasmus/what-can-i-study/\n(주거정보) https://www.uni-bamberg.de/en/studies/exchange-students-eg-erasmus/next-steps/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"엑스마르세유대학","대학명(영문)":"Aix Marseille University","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":443,"THE 랭킹":"-","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n  ※ 어학과정(풀타임) 소속 희망자의 경우 전공 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / IELTS 5.5 / TOEIC 785\n  ※ 아래 단대/전공의 경우 보다 상향된 어학기준 충족 필요\n  A. Faculty of Arts, Letters, Languages and Human sciences(ALLSH) : TOEFL iBT 95 / IELTS 7.0 / TOEIC 945\n  B. Graduate School of Management(IAE) : TOEFL iBT 85 / IELTS 6.0","세부사항":"1. 제한사항\n- (지원제한) 아래 전공/학과는 별도 요건을 충족하는 경우에 지원 가능\n  A. Economics and Management Sector : 경제학부 2학년 이상\n  B. Business and Management Sector : 경영학과 4학년 또는 석사 과정\n  C. Science and Technology Sector : 관련 전공 4학년 또는 석사 과정\n- (수강제한) Student can only take courses in one faculty at amU. \n- 엑스마르세유대학 Faculty of Arts and Letters: 영어강의 미제공될 수 있음\n- (유의사항) 대학부설프랑스어학당(SUL, French Language Center) 풀타임 소속 가능 여부 및 별도 등록금 납부 여부는 학기별로 상이하며, 선발 단계에서는 확정 불가\n  ※ 어학과정(풀타임) 소속으로 진행할 경우, 일반 대학강의 수강 불가\n  ※ 어학과정 TO 제한 시, 총점 순으로 지원 우선순위 부여","파견대학 학사력":"· Winter : Sep-Dec\n· Summer : Jan-Jun","홈페이지":"(대학) https://www.univ-amu.fr/en/\n(교환학생) https://www.univ-amu.fr/fr/etudiants-internationaux/etudiants-internationaux-echange\n(강의정보) https://www.univ-amu.fr/en/public/courses-taught-english","인기":false,"미달횟수":4,"최고차수":3,"합격인원":1},{"대학명(국문)":"브로츠와프대학","대학명(영문)":"University of Wroclaw","파견국":"폴란드","대륙":"유럽","언어":"영어","QS Ranking":"851-900","THE 랭킹":"1201–1500\n(2026)","iBT_커트":79,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 79 / IELTS 5.5 / TOEFL ITP 543","세부사항":"(해당 없음)","파견대학 학사력":"· Winter : Sep-Feb\n· Summer : Feb-Jun","홈페이지":"(대학) https://uwr.edu.pl/en/\n(교환학생) https://international.uni.wroc.pl/en/incoming-exchange-students/other-exchange-programmes\n(강의정보) https://international.uni.wroc.pl/en/incoming-exchange-students/university-guidelines-all-exchange-students\n(주거정보) https://uwr.edu.pl/en/student-houses/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"아트벨데대학,\n경영대학","대학명(영문)":"Artevelde University of Applied Sciences,\nFaculty of Business and Management","파견국":"벨기에","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":79,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 상경계열 본/복수전공\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 79/ IELTS 6 / TOEFL ITP 550","세부사항":"1. 특이사항\n(유의사항) 팀프로젝트 수업 다수 - 파견대학 국제처 공식 안내사항","파견대학 학사력":"· Autumn : Sep-Jan\n· Spring : Feb-Jun","홈페이지":"(대학) https://www.arteveldehogeschool.be/en/\n(교환학생) https://www.arteveldehogeschool.be/en/programmes/international-semester-programme/artevelde-business-school\n(강의정보) https://www.arteveldehogeschool.be/en/programmes/international-semester-programme/artevelde-business-school\n(주거정보) https://www.arteveldehogeschool.be/en/student-housing-exchange-students","인기":false,"미달횟수":1,"최고차수":3,"합격인원":1},{"대학명(국문)":"리옹고등사범학교","대학명(영문)":"ENS de Lyon","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":235,"THE 랭킹":"301-350","iBT_커트":72,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 6.0\n(프랑스어) DELF B2\n※ 인문·사회계열(철학, 역사, 문학, 언어학, 사회과학 등) 전공의 경우\nC1 수준의 프랑스어 능력이 요구되니 충족 후 지원요망","세부사항":"1. 제한사항\nMajor matching in the host and home institution is mandatory.\n2. 특이사항\n(프랑스강의) 보통 DELF B2이상 요구\n A.인문·사회계열(철학, 역사, 문학, 언어학, 사회과학 등) 전공의 경우 DELF C1 충족해야 함\nB. 이공계(수학, 물리, 화학, 생명, 지구과학, 컴퓨터 등)는 DELF B2 가능","파견대학 학사력":"· Fall : Sep-Jan\n· Spring : Jan-Jun","홈페이지":"(대학) https://www.ens-lyon.fr/en/\n(교환학생) https://www.ens-lyon.fr/en/studies/admissions/application-student-exchange-program\n(강의정보) https://www.ens-lyon.fr/formation/catalogue-de-cours/cours-pour-les-etudiants-en-echange\n(주거정보) https://www.ens-lyon.fr/en/campus-life/accommodation/bonnamour-residence","인기":false,"미달횟수":1,"최고차수":3,"합격인원":1},{"대학명(국문)":"골웨이대학","대학명(영문)":"University of Galway","파견국":"아일랜드","대륙":"유럽","언어":"영어","QS Ranking":275,"THE 랭킹":"351-400","iBT_커트":88,"IELTS_커트":6.5,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 88 (L18, R18, S21, W22)  / IELTS 6.5 (각 영역 6.0 ) \n  ※ 영역별 최저점 등 소속 과정별 기준이 상이하므로, 아래 링크의 안내사항을 반드시 확인하고 지원 가능 여부를 판단\n  ※ https://www.universityofgalway.ie/global-galway/studyinireland/entryrequirements/\n4. 특이사항 :  파견시점 기준 3학년 이상(4학기 이상 이수) 학생만 지원 가능","세부사항":"1. 제한사항\n(수강제한) 교환학생은 상단 (강의정보) 링크의 Visiting Student Handbook에 명시된 강의에 한하여 수강 가능\n  ※ 이공계열 강의(Sciences and Engineering Courses)의 경우, 수강신청 이후 개설학과 및 강의자의 별도 평가에 따라 수강이 불가할 수 있음","파견대학 학사력":"· 1st : Sep-Dec\n· 2nd : Jan-May","홈페이지":"(대학) https://www.universityofgalway.ie/\n(교환학생) https://www.universityofgalway.ie/international-students/studyabroad.html\n(강의정보) https://www.universityofgalway.ie/global-galway/inboundstudyabroad/ourprogramme/\n(주거정보) https://www.universityofgalway.ie/global-galway/inboundstudyabroad/accommodation/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"뮌헨응용과학대학","대학명(영문)":"Munich University of Applied Sciences\n(Hochschule München)","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 80 / TOEFL ITP 600 / IELTS 6.0","세부사항":"1. 제한사항\n(추가심사) Design : 파견대학 주관 별도 포트폴리오 심사 후 최종 선발(수용)여부 결정\n(수강제한) 일부과목 수강제한(별도 확인 필요)\n(우대사항)  관광컨벤션학과 지원자 우선 선발\n2. 특이사항\n(선발인원) 아래와 같이 부산대 소속 단과대학별 TO 분리하여 선발\n A. 관광컨벤션학과 소속 학생(본/복수전공 기준) : 2명\n B. 타 단과대학 소속 학생 : 1명","파견대학 학사력":"· Winter : Oct-Feb\n· Summer : Mar-Jul","홈페이지":"(대학) http://www.hm.edu/en\n(교환학생) https://hm.edu/en/your_stay_at_hm/exchange_students/index.en.html\n(강의정보) https://hm.edu/en/course_offerings/courses_in_english/index.en.html\n(주거정보) https://hm.edu/en/your_stay_at_hm/students/exchange/accommodation.en.html","인기":false,"미달횟수":4,"최고차수":3,"합격인원":1},{"대학명(국문)":"에식스대학","대학명(영문)":"University of Essex","파견국":"영국","대륙":"유럽","언어":"영어","QS Ranking":438,"THE 랭킹":"301-350","iBT_커트":82,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 82(S 20, R 18, L 17, W 17) 또는 IELTS 6.0(각 영역 5.5 이상) 이상\n  ※ '26.01.21. 이후 TOEFL iBT 4(각 영역 4)\n  ※ TOEFL My Best Score 및 IELTS One Skill Retake 인정 가능","세부사항":"1. 제한사항\n(수강제한) No Edge Hotel School modules allowed","파견대학 학사력":"· Autumn : Oct-Dec\n· Spring : Jan-Mar","홈페이지":"(대학) https://www.essex.ac.uk/\n(교환학생) https://www.essex.ac.uk/international/visiting-students/exchange-programme\n(강의정보) https://www1.essex.ac.uk/modules/","인기":true,"미달횟수":1,"최고차수":2,"합격인원":1},{"대학명(국문)":"뮌스터응용과학대학,\n경영대학","대학명(영문)":"FH Münster University of Applied Sciences,\nSchool of Business","파견국":"독일","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 경영학 본/복수전공\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 72 / TOEFL ITP 543 / IELTS 5.5\n(독일어) ZD B2 ","세부사항":"1. 특이사항\n(선발인원) 학부 2명, 대학원 2명 별도 선발\n  ※ 대학원 지원(선발)인원 0명이더라도, 학부 선발인원은 최대 2명 한도","파견대학 학사력":"· Winter : Oct-Mar\n· Summer : Apr-Sep","홈페이지":"(대학) https://en.fh-muenster.de/\n(단과대학) https://en.fh-muenster.de/msb/index.php\n(교환학생) https://www.fh-muenster.de/en/internationaloffice/aus-dem-ausland/austausch-studierende\n(강의정보) https://www.fh-muenster.de/en/msb/ofis/inba\n(주거정보) https://www.stw-muenster.de/en/wohnanlage/wilhelmskamp/","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"북경대학","대학명(영문)":"Peking University","파견국":"중국","대륙":"아시아","언어":"중국어","QS Ranking":13,"THE 랭킹":13,"iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 세부사항 참조\n2. 성적기준 : 성적 기준 없음, 파견학기 기준 2학기 이수 완료자\n3. 어학기준 : \n(학부 전공수업) 중국어 수업 수강 시 HSK 6급(180점 이상) 이상\n※ 영어 수업 수강 시 중국어 어학시험 성적 불필요\n(중국어 연수) 제한 없음\n4. 특이사항 : 방문학생 자격으로 수학(GVS3), 중국 시민권자 지원 불가","세부사항":"1. 특이사항\n(제한사항) 학부생은 학부전공수업 또는 중국어 언어수업 중 택 1, 대학원생은 중국어 언어수업만 이수 가능, 인문대학 중 언어전공(중국어 제외)일 경우 학부전공수업 이수 불가, 중국어 언어수업만 이수 가능\n(비용) 신청수수료-400RMB, 등록금-(중국어연수)18,000RMB/학기,(전공과정)24,000RMB/학기, 교재비-300RMB/학기, 의료보험 별도","파견대학 학사력":"· Autumn : Sep-Jan\n· Spring : Feb-June","홈페이지":"(대학 영문) https://www.isd.pku.edu.cn/cn/\nhttps://isd.pku.edu.cn/en/further_detail.php?tag=general_visiting_program\n(학부 수강정보) http://www.dean.pku.edu.cn/service/web/courseSearch.php\n(중국어연수 강의정보) For details, please visit School of Chinese as Second Language at http://hy.pku.edu.cn.\n(주거정보) https://pkugv.pku.edu.cn/","인기":false,"미달횟수":2,"최고차수":3,"합격인원":1},{"대학명(국문)":"나고야외국어대학교","대학명(영문)":"Nagoya University of Foreign Studies","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":"","IELTS_커트":"","자격기준":"1. 전공기준 : 파견대학 일부 전공 지원 제한\n2. 성적기준 : 평점평균 4.5 만점 기준 2.5 이상 \n3. 어학기준\n- Study abroad at NUFS Undergraduate: \n  (일본어) JLPT N2 level","세부사항":"o Study Abroad at NUFS Undergraduate and Graduate Schools\n(세부정보) https://www-e.nufs.ac.jp/interchange/incoming/tokubetsu/\n* Program for students with higher Japanese proficiency, who wish to enroll in classes in Japanese with NUFS domestic students.","파견대학 학사력":"· Spring : Apr-July\n· Fall : Sep-Dec","홈페이지":"(대학) https://www-e.nufs.ac.jp/\n(교환학생) https://www-e.nufs.ac.jp/interchange/incoming/\n(주거정보) https://www-e.nufs.ac.jp/interchange/incoming/housing/","인기":true,"미달횟수":0,"최고차수":0,"합격인원":1},{"대학명(국문)":"KEDGE경영대학","대학명(영문)":"KEDGE Business School","파견국":"프랑스","대륙":"유럽","언어":"영어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":79,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어) TOEFL iBT 79 / TOEFL ITP 550 / IELTS 6.0 / TOEIC 785\n(프랑스어) DELF B2 ","세부사항":"1. 특이사항\n(영어강의) 캠퍼스(보르도, 마르세유) 및 학기별로 영어 강의가 진행되는 프로그램이 다르므로, 반드시 파견대학 홈페이지에서 확인 후 지원","파견대학 학사력":"· Fall : Aug-Dec\n· Spring : Jan-May","홈페이지":"(대학) https://student.kedge.edu/\n(교환학생) https://student.kedge.edu/exchange-students\n(강의정보) https://student.kedge.edu/exchange-students","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"빌뉴스대학","대학명(영문)":"Vilnius University ","파견국":"리투아니아","대륙":"유럽","언어":"영어","QS Ranking":465,"THE 랭킹":"801-1000","iBT_커트":72,"IELTS_커트":5.5,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 교환학생 지원 시점 기준 직전학기 학사경고자 지원 불가\n3. 어학기준 :\n(영어)  TOEFL iBT 72 / TOEFL ITP 550 / IELTS 5.5 / TOEIC 785 ","세부사항":"1. 제한사항\n(수강제한) \n- Students must take courses alligning with their major at home university.\n- Courses from the Institute of International Relations and Political Science can be selected only by students in political study area. Most courses in the Faculty of Medicine are open only to medical students.\n2. 특이사항\n(기숙사) 양교 간 협정에 따라, 파견대학 기숙사 무료 제공","파견대학 학사력":"· Autumn : Sep-Feb\n· Spring : Feb-Aug","홈페이지":"(대학) https://www.vu.lt/en/\n(교환학생) https://www.old.vu.lt/en/studies/exchange-students/how-to-apply\n(강의정보) https://is.vu.lt/pls/pub/vustud.public_ni$wwwtprs.dalsar_show\n(주거정보) https://www.vu.lt/en/students/services-for-students/accommodation","인기":false,"미달횟수":3,"최고차수":3,"합격인원":1},{"대학명(국문)":"산동대학, 위해캠퍼스","대학명(영문)":"Shandong University, Weihai","파견국":"중국","대륙":"아시아","언어":"중국어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 전공매칭 필수 - 파견대학 소속 희망 전공 관련 학문적 배경(본/복수/부전공) 필요\n2. 성적기준 : 평점평균 4.5 만점 기준 2.8 이상\n3. 어학기준 :\n(영어) TOEFL iBT 80 / IELTS 6.0 \n(중국어)\n- (일반 전공강의) HSK 4급 \n- (중국어 어학과정) 중국어 학습 희망자\n4. 특이사항 : 최소 2학기 이상 이수 학생만 지원 가능","세부사항":"1. 제한사항\n(지원제한) 우측 (교환학생) 홈페이지를 참고, '모집전공'으로 안내된 전공에만 지원 가능","파견대학 학사력":"· Fall : Sep-Jan\n· Spring : Feb-Jul","홈페이지":"(대학) https://ipo.wh.sdu.edu.cn/\n(교환학생) https://ipo.wh.sdu.edu.cn/kristudy/lxxm1/jhsxm.htm","인기":false,"미달횟수":4,"최고차수":3,"합격인원":1},{"대학명(국문)":"게이오대학","대학명(영문)":"Keio University","파견국":"일본","대륙":"아시아","언어":"영어","QS Ranking":213,"THE 랭킹":"601-800","iBT_커트":79,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5만점 기준 3.5 이상\n3. 어학기준 : 지원 언어별로 소속 가능 프로그램이 상이함에 유의\n(영어) TOEFL iBT 79 / IELTS 6.0\n＊TOEFL IBT('26.01.21. 이후) overall 4\n- (가능 프로그램) Keio International Program (KIP)\n(일본어) 가나문자를 숙지한, 일본어 학습 희망자\n- (가능 프로그램) Japanese Language Program (JLP) ","세부사항":"1. 특이사항\n-The majority of courses for KIP/JLP students will be held at the Mita campus.\n(수강제한)\nThe following courses are not open to exchange students. In addition, due to different semester/ term systems, Keio Business School (KBS) courses are not open to exchange students except for faculty-level exchange students from Copenhagen Business School (CBS).\n- Physical education courses\n- Teacher training courses\n- Courses in the School of Medicine\n- Foreign language courses *Japanese language is excluded","파견대학 학사력":"· Spring : Apr-Sep\n· Fall : Oct-Mar","홈페이지":"(대학) https://www.keio.ac.jp/en/\n(교환학생) https://www.ic.keio.ac.jp/en/study/exchange/\n(강의정보) https://www.ic.keio.ac.jp/en/study/exchange/courses/courses_available_for_exchange_students.html\n(주거정보) https://www.ic.keio.ac.jp/en/study/exchange/housing.html","인기":true,"미달횟수":0,"최고차수":1,"합격인원":1},{"대학명(국문)":"홍콩중문대학","대학명(영문)":"The Chinese University of Hong Kong","파견국":"중국\n(홍콩)","대륙":"아시아","언어":"영어","QS Ranking":18,"THE 랭킹":41,"iBT_커트":80,"IELTS_커트":6,"자격기준":"1. 전공기준 : 제한 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.5 이상\n3. 어학기준 :\n(영어) TOEFL iBT 80 ('26.01.21.이후 4.5) / IELTS 6.0","세부사항":"1. 특이사항\n(어학수업) The Yale-China Chinese Language Academy (CLA) offers Cantonese and Putonghua courses at all levels. Most undergraduate exchange students can take a maximum of 6 units (2 courses) each term without paying additional tuition fees. Postgraduate exchange students\nare required to pay tuition for taking Chinese proficiency courses.\n2. 제한사항\n- Courses unavailable to exchange students : \nhttps://www.oalglobal.cuhk.edu.hk/files/incoming/course_exceptions.pdf","파견대학 학사력":"· 1st : Sep-Dec\n· 2nd : Jan-May","홈페이지":"(대학) http://www.cuhk.edu.hk/english\n(교환학생) https://www.oalglobal.cuhk.edu.hk/getting_started/\n(강의정보) https://www.oalglobal.cuhk.edu.hk/academics/\n(주거정보) https://www.oalglobal.cuhk.edu.hk/campuslife/","인기":true,"미달횟수":1,"최고차수":2,"합격인원":1},{"대학명(국문)":"야마구치현립대학","대학명(영문)":"Yamaguchi Prefectural University","파견국":"일본","대륙":"아시아","언어":"일어","QS Ranking":"-","THE 랭킹":"-","iBT_커트":55,"IELTS_커트":5.7,"자격기준":"1. 전공기준 : 제한사항 없음\n2. 성적기준 : 평점평균 4.5 만점 기준 3.0 이상\n3. 어학기준 : \n(영어) TOEFL iBT 55 / TOEIC 700 / IELTS 5.7 \n(일본어) JLPT N2 ","세부사항":"(해당 없음)","파견대학 학사력":"· Spring : Apr-Aug\n· Fall : Oct-Feb","홈페이지":"(대학) https://www.yamaguchi-pu.ac.jp/\n(교환학생)https://www.yamaguchi-pu.ac.jp/en/\n(세부사항) https://www.yamaguchi-pu.ac.jp/en/contents/202603050920/7f1b31df2bfa338171983a2c62ea573f7e8c7fff.pdf","인기":false,"미달횟수":4,"최고차수":2,"합격인원":1}];
+let filtered = [...DATA];
+
+function majorBadge(d) {
+  const cat = majorReq(d);
+  const map = {
+    OPEN:  ['major-ok','전공무관'],
+    MATCH: ['major-likely','전공매칭 필수'],
+    PARTIAL:['major-chk','일부전공 제한'],
+    BIZ:   ['major-biz','상경계열'],
+    SOCIAL:['major-biz','사회과학'],
+    HUMSOC:['major-biz','인문사회'],
+    POLI:  ['major-biz','정치·국제'],
+    CHECK: ['major-chk','확인 필요'],
+  };
+  const [cls,label] = map[cat]||['major-ok','전공무관'];
+  return `<span class="badge ${cls}" style="margin-top:3px">${label}</span>`;
+}
+
+// 인기도 배지: 인기교 = ⭐, 비인기교 = 사유 표시
+function popBadge(d) {
+  if(d['인기']) return `<span class="badge pop-in">⭐ 인기</span>`;
+  const reason = d['최고차수']>=3 ? '3차경험' : (d['미달횟수']>=2 ? '미달 '+d['미달횟수']+'회' : '미달');
+  return `<span class="badge pop-un">비인기</span><div style="font-size:9px;color:#94a3b8;margin-top:2px">${reason}</div>`;
+}
+
+function applyFilter() {
+  const cont    = document.getElementById('f-cont').value;
+  const country = document.getElementById('f-country').value;
+  const lang    = document.getElementById('f-lang').value;
+  const qs      = parseFloat(document.getElementById('f-qs').value);
+  const ibt     = parseFloat(document.getElementById('f-ibt').value);
+  const unpopOnly= document.getElementById('f-hist').checked;
+  const major   = document.getElementById('f-major').value;
+
+  filtered = DATA.filter(d => {
+    if (cont    && d['대륙'] !== cont) return false;
+    if (country && d['파견국'].trim() !== country) return false;
+    if (lang    && !d['언어'].includes(lang)) return false;
+    if (!isNaN(qs)) { const q=parseInt(d['QS Ranking']); if(!isNaN(q)&&q>qs) return false; }
+    if (!isNaN(ibt)) {
+      const cut = d['iBT_커트'];
+      if (cut !== '' && !isNaN(Number(cut)) && ibt < Number(cut)) return false;
+    }
+    if (unpopOnly && d['인기']) return false;
+    if (major) {
+      const cat = majorReq(d);
+      if (['BIZ','SOCIAL','HUMSOC','POLI'].includes(cat) && !(MAJOR_ALLOW[major]||[]).includes(cat)) return false;
+    }
+    return true;
+  });
+
+  const sb = document.getElementById('sort-by').value;
+  filtered.sort((a,b) => {
+    if(sb==='qs')  { const av=parseInt(a['QS Ranking']),bv=parseInt(b['QS Ranking']); if(isNaN(av)&&isNaN(bv))return 0; if(isNaN(av))return 1; if(isNaN(bv))return -1; return av-bv; }
+    if(sb==='the') { const av=parseInt(a['THE 랭킹']),bv=parseInt(b['THE 랭킹']); if(isNaN(av)&&isNaN(bv))return 0; if(isNaN(av))return 1; if(isNaN(bv))return -1; return av-bv; }
+    if(sb==='hap') { return (parseInt(b['합격인원'])||0)-(parseInt(a['합격인원'])||0); }
+    if(sb==='country') return a['파견국'].localeCompare(b['파견국'],'ko');
+    return 0;
+  });
+
+  render();
+}
+
+function render() {
+  const tbody = document.getElementById('tbody');
+  const noRes = document.getElementById('no-result');
+  document.getElementById('s-count').textContent = filtered.length;
+
+  document.getElementById('s-to').textContent = filtered.reduce((s,d)=>s+(parseInt(d['합격인원'])||0),0);
+  document.getElementById('s-hist').textContent = filtered.filter(d=>!d['인기']).length;
+
+  if(!filtered.length) { tbody.innerHTML=''; noRes.style.display='block'; return; }
+  noRes.style.display='none';
+
+  const ibt = parseFloat(document.getElementById('f-ibt').value);
+  tbody.innerHTML = filtered.map((d,i) => {
+    const qs  = d['QS Ranking'], the = d['THE 랭킹'];
+    const qsH = (qs&&qs!=='') ? `<div class="rank-qs">QS ${qs}</div>` : '<div style="color:#cbd5e1;font-size:10px">-</div>';
+    const theH= (the&&the!=='')? `<div class="rank-the">THE ${the}</div>` : '';
+
+    const cut = d['iBT_커트'];
+    let scoreH = '';
+    if(cut!=='') {
+      const ok = !isNaN(ibt) && ibt >= Number(cut);
+      const cls = !isNaN(ibt) ? (ok?'score-ok':'score-ng') : '';
+      const mark = !isNaN(ibt) ? (ok?' ✓':' ✗') : '';
+      scoreH = `<span class="${cls}">iBT ${cut}${mark}</span>`;
+    } else {
+      scoreH = '<span style="color:#cbd5e1;font-size:10px">정보없음</span>';
+    }
+
+    const idx = DATA.indexOf(d);
+    const rowBg = d['인기'] ? 'background:#fffdf5' :
+                  (d['최고차수']>=3 ? 'background:#fff5f5' : 'background:#fffbeb');
+    return `<tr onclick="showModal(${idx})" style="${rowBg}">
+      <td style="color:#94a3b8;font-size:11px;text-align:center">${i+1}</td>
+      <td><span class="badge b${d['대륙']}">${d['대륙']}</span><div style="font-size:11px;color:#64748b;margin-top:3px">${d['파견국']}</div></td>
+      <td style="min-width:160px"><div class="univ-kr">${d['인기']?'<span class="star">★</span>':''}${d['대학명(국문)']}</div><div class="univ-en">${d['대학명(영문)']}</div></td>
+      <td style="font-size:11px;white-space:pre-line;color:#475569">${d['언어']}</td>
+      <td style="min-width:80px">${qsH}${theH}</td>
+      <td>${scoreH}</td>
+      <td class="to-num">${d['합격인원']||'-'}</td>
+      <td>${popBadge(d)}</td>
+      <td>${majorBadge(d)}</td>
+      <td><button class="btn-detail" onclick="event.stopPropagation();showModal(${idx})">상세보기</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function showModal(idx) {
+  const d = DATA[idx];
+  document.getElementById('m-kr').textContent = d['대학명(국문)'];
+  document.getElementById('m-en').textContent = (d['대학명(영문)']||'') + '  ·  ' + d['파견국'] + '  ·  ' + (d['대륙']||'');
+  document.getElementById('m-qual').textContent   = d['자격기준']||'-';
+  document.getElementById('m-detail').textContent = d['세부사항']||'-';
+  document.getElementById('m-sched').textContent  = d['파견대학 학사력']||'-';
+
+  // 메타 정보
+  const cut = d['iBT_커트']!=='' ? `iBT ${d['iBT_커트']}` : (d['IELTS_커트']!=='' ? `IELTS ${d['IELTS_커트']}` : '정보없음');
+  const hist = d['인기'] ? '⭐ 인기교' : `비인기교 (미달 ${d['미달횟수']||0}회${d['최고차수']>=3?', 3차경험':''})`;
+  document.getElementById('m-meta').innerHTML = `
+    <div class="meta-item"><strong>QS 랭킹</strong><span>${d['QS Ranking']||'-'}</span></div>
+    <div class="meta-item"><strong>THE 랭킹</strong><span>${d['THE 랭킹']||'-'}</span></div>
+    <div class="meta-item"><strong>1차 합격</strong><span>${d['합격인원']||'-'}명</span></div>
+    <div class="meta-item"><strong>어학 커트라인</strong><span>${cut}</span></div>
+    <div class="meta-item"><strong>언어</strong><span>${d['언어']}</span></div>
+    <div class="meta-item"><strong>인기도</strong><span>${hist}</span></div>
+    <div class="meta-item"><strong>학위과정</strong><span>${d['선발 학위과정']||'-'}</span></div>
+    <div class="meta-item"><strong>학제</strong><span>${d['파견대학 학제']||'-'}</span></div>
+  `;
+
+  // 링크
+  const links = (d['홈페이지']||'').split('\n').filter(l=>l.trim());
+  document.getElementById('m-links').innerHTML = links.map(l => {
+    const url = l.match(/https?:\/\/[^\s]+/) || l.match(/www\.[^\s]+/);
+    if(!url) return `<span style="font-size:11px;color:#64748b">${l}</span>`;
+    const href = url[0].startsWith('http') ? url[0] : 'http://'+url[0];
+    const label = l.replace(url[0],'').replace(/[()（）]/g,'').trim() || url[0];
+    return `<a href="${href}" target="_blank" rel="noopener">${label} ↗</a>`;
+  }).join('') || '<span style="color:#cbd5e1">정보없음</span>';
+
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); if(e.key==='Enter') applyFilter(); });
+
+// 나라 선택 시 대륙 자동 연동
+document.getElementById('f-country').addEventListener('change', function() {
+  const country = this.value;
+  if(!country) return;
+  const found = DATA.find(d => d['파견국'].trim() === country);
+  if(found) document.getElementById('f-cont').value = found['대륙'];
+  applyFilter();
+});
+document.getElementById('f-cont').addEventListener('change', function() {
+  document.getElementById('f-country').value = '';
+  applyFilter();
+});
+
+// 초기화 버튼 (기존 미정의 버그 수정)
+function resetFilter(){
+  ['f-cont','f-country','f-lang','f-qs','f-ibt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-hist').checked=false;
+  document.getElementById('f-major').value='';
+  document.getElementById('sort-by').value='hap';
+  applyFilter();
+}
+
+/* ================= 전공 요건 파싱 & 계열 매핑 ================= */
+// 각 대학의 자격기준에서 전공 요건을 분류
+// OPEN(전공무관) / MATCH(파견대학 전공 매칭 필수) / PARTIAL(일부전공 제한)
+// BIZ(상경) / SOCIAL(사회과학) / HUMSOC(인문사회) / POLI(정치·국제) / CHECK(확인필요)
+function majorReq(d){
+  const q=(d['자격기준']||'');
+  const t=(q.split('\n').find(l=>l.includes('전공'))||'');
+  if(/제한\s*없음|제한사항\s*없음|전공제한\s*없음|전공\s*제한\s*없음/.test(t)) return 'OPEN';
+  if(/권장/.test(t)) return 'OPEN';               // 매칭 '권장'은 필수 아님 → 전공무관 취급
+  if(/상경|경영/.test(t)) return 'BIZ';
+  if(/사회과학/.test(t)) return 'SOCIAL';
+  if(/인문사회|Human and social/i.test(t)) return 'HUMSOC';
+  if(/국제관계|정치|International Relations|Political/i.test(t)) return 'POLI';
+  if(/일부\s*전공|프로그램별|확인\s*필수|특정\s*전공/.test(t)) return 'PARTIAL';
+  if(/매칭\s*필수/.test(t)) return 'MATCH';
+  return 'CHECK';
+}
+// 부산대 계열 → 허용되는 '특정계열 한정' 요건 (여기 없는 특정계열 대학은 제외됨)
+// OPEN/MATCH/PARTIAL/CHECK 는 계열과 무관하게 항상 표시 (매칭·제한은 상세에서 확인)
+const MAJOR_ALLOW={
+  '인문계열':['HUMSOC'],
+  '사회과학계열':['SOCIAL','HUMSOC','POLI'],
+  '상경계열':['BIZ'],
+  '자연과학계열':[],
+  '공학계열':[],
+  '사범계열':[],
+  '예술·체육계열':[],
+  '의약·생명계열':[],
+  '생활과학계열':[],
+  '자유전공·기타':['BIZ','SOCIAL','HUMSOC','POLI']  // 어떤 전공도 선택 가능 → 제외 없음
+};
+
+/* ================= 익명 검색기록 로깅 (Supabase) ================= */
+const SB_URL='https://stplxjpjuevqpfeuejrk.supabase.co';
+const SB_KEY='sb_publishable_SQN9wpSQt4DC4AB0Q4rZUw_wyTJCKJ9';
+const SB_HEAD={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+// 익명 자동 ID (브라우저별, 개인 식별 정보 아님)
+let SEARCHER_ID=localStorage.getItem('exf_sid');
+if(!SEARCHER_ID){ SEARCHER_ID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('sid-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('exf_sid',SEARCHER_ID); }
+
+function _v(id){return document.getElementById(id).value;}
+function currentFilters(){
+  return {
+    대륙:_v('f-cont'), 나라:_v('f-country'), 언어:_v('f-lang'),
+    QS상한:_v('f-qs'), iBT:_v('f-ibt'), 페이지:'1차합격결과',
+    비인기만:document.getElementById('f-hist').checked,
+    전공계열:_v('f-major'),
+    정렬:_v('sort-by')
+  };
+}
+function isEmptyFilters(f){
+  return !f.대륙&&!f.나라&&!f.언어&&!f.QS상한&&!f.iBT&&!f.비인기만&&!f.전공계열;
+}
+
+let _logTimer=null,_lastLogKey=null;
+function scheduleLog(){ clearTimeout(_logTimer); _logTimer=setTimeout(sendLog,1200); }
+function sendLog(){
+  const f=currentFilters();
+  if(isEmptyFilters(f)) return;              // 기본(빈) 상태는 기록 안 함
+  const key=JSON.stringify(f);
+  if(key===_lastLogKey) return;              // 직전과 동일 조건 중복 방지
+  _lastLogKey=key;
+  postLog({
+    searcher_id:SEARCHER_ID, filters:f,
+    result_count:filtered.length,
+    result_names:filtered.map(d=>d['대학명(국문)']).slice(0,120),
+    user_agent:navigator.userAgent
+  });
+}
+function postLog(rec){
+  fetch(SB_URL+'/rest/v1/search_logs',{method:'POST',headers:Object.assign({},SB_HEAD,{'Prefer':'return=minimal'}),body:JSON.stringify(rec)})
+    .then(r=>{ if(!r.ok) throw new Error('log '+r.status); })
+    .catch(()=>{ try{ const q=JSON.parse(localStorage.getItem('exf_queue')||'[]'); q.push(rec); localStorage.setItem('exf_queue',JSON.stringify(q.slice(-200))); }catch(e){} });
+}
+function flushQueue(){
+  let q; try{ q=JSON.parse(localStorage.getItem('exf_queue')||'[]'); }catch(e){ q=[]; }
+  if(!q.length) return;
+  localStorage.removeItem('exf_queue');
+  fetch(SB_URL+'/rest/v1/search_logs',{method:'POST',headers:Object.assign({},SB_HEAD,{'Prefer':'return=minimal'}),body:JSON.stringify(q)})
+    .catch(()=>{ localStorage.setItem('exf_queue',JSON.stringify(q)); });
+}
+// applyFilter 래핑 → 필터 적용 시 로깅 예약
+const _origApply=applyFilter;
+applyFilter=function(){ _origApply.apply(this,arguments); scheduleLog(); };
+
+/* ================= 운영자 콘솔 ================= */
+let OP_PASS=null,OP_DATA=[];
+function opOpen(){ document.getElementById('op-overlay').classList.add('open'); }
+function opClose(){ document.getElementById('op-overlay').classList.remove('open'); }
+function opErr(msg){ const e=document.getElementById('op-err'); e.textContent=msg; e.style.display=msg?'block':'none'; }
+function opCall(fn,args){
+  return fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:SB_HEAD,body:JSON.stringify(args)})
+    .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json().catch(()=>null); });
+}
+function opLogin(){
+  const pass=document.getElementById('op-pass').value;
+  if(!pass){ opErr('비밀번호를 입력하세요.'); return; }
+  opErr('');
+  opCall('admin_get_logs',{pass}).then(rows=>{
+    OP_PASS=pass; OP_DATA=rows||[];
+    document.getElementById('op-login').style.display='none';
+    document.getElementById('op-console').style.display='block';
+    opRender();
+  }).catch(()=>opErr('비밀번호가 올바르지 않습니다.'));
+}
+function opRefresh(){ opCall('admin_get_logs',{pass:OP_PASS}).then(rows=>{ OP_DATA=rows||[]; opRender(); }).catch(()=>alert('불러오기 실패')); }
+function groupBySearcher(rows){ const m={}; rows.forEach(r=>{ (m[r.searcher_id]=m[r.searcher_id]||[]).push(r); }); return m; }
+function fmtFilters(f){
+  if(!f) return '(조건없음)';
+  const p=[];
+  if(f.대륙)p.push('대륙:'+f.대륙); if(f.나라)p.push('나라:'+f.나라); if(f.언어)p.push('언어:'+f.언어);
+  if(f.QS상한)p.push('QS≤'+f.QS상한); if(f.iBT)p.push('iBT:'+f.iBT);
+  if(f.비인기만)p.push('비인기교만'); if(f.전공계열)p.push('전공:'+f.전공계열); if(f.정렬)p.push('정렬:'+f.정렬);
+  return p.join(', ')||'(조건없음)';
+}
+function fmtTime(t){ try{ return new Date(t).toLocaleString('ko-KR',{hour12:false}); }catch(e){ return t; } }
+function cssId(s){ return s.replace(/[^a-zA-Z0-9]/g,''); }
+function opToggle(id){ document.getElementById('op-s-'+id).classList.toggle('open'); }
+function opRender(){
+  const g=groupBySearcher(OP_DATA);
+  const sids=Object.keys(g).sort((a,b)=>g[b].length-g[a].length);
+  document.getElementById('op-summary').innerHTML='총 <strong>'+OP_DATA.length+'</strong>건 · 검색자 <strong>'+sids.length+'</strong>명';
+  const list=document.getElementById('op-list');
+  if(!OP_DATA.length){ list.innerHTML='<div class="op-muted">아직 기록이 없습니다.</div>'; return; }
+  list.innerHTML=sids.map(sid=>{
+    const rows=g[sid].slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    const last=rows[0]?fmtTime(rows[0].created_at):'-';
+    const body=rows.map(r=>'<tr><td style="white-space:nowrap">'+fmtTime(r.created_at)+'</td><td>'+fmtFilters(r.filters)+'</td><td style="text-align:center">'+r.result_count+'</td></tr>').join('');
+    return '<div class="op-searcher" id="op-s-'+cssId(sid)+'">'+
+      '<div class="op-searcher-head" onclick="opToggle(\''+cssId(sid)+'\')">'+
+        '<span><span class="op-sid">'+sid.slice(0,8)+'…</span> · '+rows.length+'건 · 최근 '+last+'</span>'+
+        '<button class="op-btn red" style="padding:4px 9px" onclick="event.stopPropagation();opDeleteSearcher(\''+sid+'\')">삭제</button>'+
+      '</div>'+
+      '<div class="op-searcher-body"><table class="op-log-table"><thead><tr><th>시각</th><th>필터 조건</th><th>결과수</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+    '</div>';
+  }).join('');
+}
+function opDeleteSearcher(sid){
+  if(!confirm('이 검색자의 기록을 모두 삭제할까요?\n'+sid)) return;
+  opCall('admin_delete_searcher',{pass:OP_PASS,sid}).then(()=>opRefresh()).catch(()=>alert('삭제 실패'));
+}
+function opClearAll(){
+  if(!confirm('전체 검색 기록을 삭제합니다. 되돌릴 수 없습니다. 계속할까요?')) return;
+  opCall('admin_clear_logs',{pass:OP_PASS}).then(()=>opRefresh()).catch(()=>alert('삭제 실패'));
+}
+function opChangePass(){
+  const np=prompt('새 비밀번호 (6자 이상):'); if(!np) return;
+  if(np.length<6){ alert('6자 이상이어야 합니다.'); return; }
+  opCall('admin_set_pass',{pass:OP_PASS,new_pass:np}).then(()=>{ OP_PASS=np; alert('비밀번호가 변경되었습니다.'); }).catch(()=>alert('변경 실패'));
+}
+/* ---- 다운로드 ---- */
+function opFlatRows(){
+  return OP_DATA.map(r=>{ const f=r.filters||{}; return {
+    검색자ID:r.searcher_id, 시각:fmtTime(r.created_at),
+    대륙:f.대륙||'', 나라:f.나라||'', 언어:f.언어||'',
+    QS상한:f.QS상한||'', iBT:f.iBT||'',
+    비인기만:f.비인기만?'Y':'', 전공계열:f.전공계열||'', 정렬:f.정렬||'',
+    결과수:r.result_count, 결과대학:(r.result_names||[]).join(' | ')
+  };});
+}
+function ymd(){ const d=new Date(); return ''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
+function downloadBlob(content,filename,type){
+  const blob=new Blob([content],{type:type+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function opDownloadMd(){
+  const g=groupBySearcher(OP_DATA);
+  const sids=Object.keys(g).sort((a,b)=>g[b].length-g[a].length);
+  let md='# 교환학생 필터 검색 기록\n\n- 생성: '+new Date().toLocaleString('ko-KR',{hour12:false})+'\n- 총 검색 '+OP_DATA.length+'건 · 검색자 '+sids.length+'명\n\n';
+  sids.forEach(sid=>{
+    const rows=g[sid].slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    md+='## 검색자 `'+sid+'` ('+rows.length+'건)\n\n| 시각 | 필터 조건 | 결과수 | 결과 대학(일부) |\n|---|---|---|---|\n';
+    rows.forEach(r=>{ md+='| '+fmtTime(r.created_at)+' | '+fmtFilters(r.filters)+' | '+r.result_count+' | '+(r.result_names||[]).slice(0,20).join(', ')+' |\n'; });
+    md+='\n';
+  });
+  downloadBlob(md,'교환학생_검색기록_'+ymd()+'.md','text/markdown');
+}
+let _sheetjs=null;
+function loadSheetJS(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(_sheetjs) return _sheetjs;
+  _sheetjs=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'; s.onload=()=>window.XLSX?res(window.XLSX):rej(); s.onerror=rej; document.head.appendChild(s); });
+  return _sheetjs;
+}
+function opDownloadXlsx(){
+  const rows=opFlatRows();
+  if(!rows.length){ alert('데이터가 없습니다.'); return; }
+  loadSheetJS().then(XLSX=>{
+    const g=groupBySearcher(OP_DATA);
+    const summary=Object.keys(g).map(sid=>({검색자ID:sid,검색건수:g[sid].length,최근검색:fmtTime(g[sid].map(r=>r.created_at).sort().slice(-1)[0])}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'검색기록');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'검색자요약');
+    XLSX.writeFile(wb,'교환학생_검색기록_'+ymd()+'.xlsx');
+  }).catch(()=>{
+    const cols=Object.keys(rows[0]);
+    const csv=[cols.join(',')].concat(rows.map(r=>cols.map(c=>'"'+String(r[c]).replace(/"/g,'""')+'"').join(','))).join('\n');
+    downloadBlob('﻿'+csv,'교환학생_검색기록_'+ymd()+'.csv','text/csv');
+    alert('엑셀 라이브러리 로드 실패 → CSV로 다운로드했습니다.');
+  });
+}
+
+flushQueue();
+applyFilter();
+</script>
+</body>
+</html>
