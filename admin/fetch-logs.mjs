@@ -67,6 +67,18 @@ async function main() {
   for (const r of rows) (bySearcher[r.searcher_id] ??= []).push(r);
   const sids = Object.keys(bySearcher);
   console.log(`✅ 총 ${rows.length}건 · 검색자 ${sids.length}명`);
+
+  // 출처(사이트/페이지)별 분류
+  const bySource = {};
+  for (const r of rows) {
+    const src = (r.filters && r.filters['출처']) || '(태그없음)';
+    bySource[src] = (bySource[src] || 0) + 1;
+  }
+  console.log('── 출처별 ──');
+  for (const [src, n] of Object.entries(bySource).sort((a, b) => b[1] - a[1])) {
+    console.log(`   ${String(n).padStart(5)}건  ${src}`);
+  }
+
   if (args.includes('--stats')) return;
   if (!rows.length) { console.log('저장할 데이터가 없습니다.'); return; }
 
@@ -78,10 +90,10 @@ async function main() {
   writeFileSync(join(outDir, `logs_${stamp}.json`), JSON.stringify(rows, null, 2));
 
   // CSV (엑셀에서 열림, BOM 포함)
-  const cols = ['created_at','searcher_id','페이지','대륙','나라','언어','QS상한','iBT','전공계열','비인기만','정렬','result_count','result_names','user_agent'];
+  const cols = ['created_at','출처','searcher_id','페이지','대륙','나라','언어','QS상한','iBT','전공계열','비인기만','정렬','result_count','result_names','user_agent'];
   const csv = [cols.join(',')].concat(rows.map(r => {
     const f = r.filters || {};
-    return [fmtTime(r.created_at), r.searcher_id, f.페이지||'', f.대륙||'', f.나라||'', f.언어||'', f.QS상한||'', f.iBT||'', f.전공계열||'', f.비인기만?'Y':'', f.정렬||'', r.result_count, (r.result_names||[]).join(' | '), r.user_agent||''].map(csvCell).join(',');
+    return [fmtTime(r.created_at), f.출처||'', r.searcher_id, f.페이지||'', f.대륙||'', f.나라||'', f.언어||'', f.QS상한||'', f.iBT||'', f.전공계열||'', f.비인기만?'Y':'', f.정렬||'', r.result_count, (r.result_names||[]).join(' | '), r.user_agent||''].map(csvCell).join(',');
   })).join('\n');
   writeFileSync(join(outDir, `logs_${stamp}.csv`), '﻿' + csv);
 

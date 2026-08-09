@@ -470,6 +470,7 @@ if(!SEARCHER_ID){ SEARCHER_ID=(window.crypto&&crypto.randomUUID)?crypto.randomUU
 function _v(id){return document.getElementById(id).value;}
 function currentFilters(){
   return {
+    출처:location.pathname,
     대륙:_v('f-cont'), 나라:_v('f-country'), 언어:_v('f-lang'),
     QS상한:_v('f-qs'), iBT:_v('f-ibt'), 최소남은TO:_v('f-to'), 지원가능만:document.getElementById('f-open').checked, 페이지:'2차선발',
     비인기만:document.getElementById('f-hist').checked,
